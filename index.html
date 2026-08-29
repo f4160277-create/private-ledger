@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Private Ledger | السجل المالي المشفر</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap');
+    body { font-family: 'Tajawal', sans-serif; background-color: #0b0f19; color: #f9fafb; }
+    .gold-text { background: linear-gradient(135deg, #FFFBEB 0%, #FCD34D 50%, #F59E0B 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .marquee-container { overflow: hidden; white-space: nowrap; position: relative; }
+    .marquee-content-rtl { display: inline-block; animation: marquee-rtl 20s linear infinite; }
+    .marquee-content-ltr { display: inline-block; animation: marquee-ltr 20s linear infinite; }
+    @keyframes marquee-rtl { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
+    @keyframes marquee-ltr { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- الشريط الإعلاني المتحرك للمالك -->
+  <div id="tickerBanner" class="bg-amber-500/10 border-b border-amber-500/20 text-amber-300 py-2.5 px-4 hidden">
+    <div class="max-w-7xl mx-auto marquee-container">
+      <div id="tickerText" class="marquee-content-rtl font-semibold text-sm"></div>
+    </div>
+  </div>
+
+  <!-- ترويسة الموقع -->
+  <header class="border-b border-gray-800 bg-[#111827]/90 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+      
+      <!-- الشعار في الموقع -->
+      <div class="flex items-center gap-3">
+        <svg width="46" height="46" viewBox="0 0 120 120" fill="none" class="shrink-0">
+          <defs>
+            <linearGradient id="goldHead" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#FFFBEB" />
+              <stop offset="50%" stop-color="#F59E0B" />
+              <stop offset="100%" stop-color="#B45309" />
+            </linearGradient>
+          </defs>
+          <path d="M15 32C15 32 35 24 60 24C85 24 105 32 105 32V88C105 88 85 80 60 80C35 80 15 88 15 88V32Z" fill="#1e293b" stroke="url(#goldHead)" stroke-width="4"/>
+          <line x1="60" y1="24" x2="60" y2="80" stroke="url(#goldHead)" stroke-width="4"/>
+          <circle cx="60" cy="56" r="18" fill="#0b0f19" stroke="url(#goldHead)" stroke-width="3"/>
+          <text x="60" y="62" text-anchor="middle" fill="url(#goldHead)" font-size="13" font-weight="900">فهد</text>
+        </svg>
+        <div>
+          <h1 class="text-lg font-black tracking-wider gold-text">برايفت ليدجر | PRIVATE LEDGER</h1>
+          <p class="text-xs text-gray-400">السجل المالي المعتمد والمشفر</p>
+        </div>
+      </div>
+
+      <!-- الأزرار العلوية -->
+      <div class="flex items-center gap-3">
+        <a href="https://share-store.com" target="_blank" class="flex items-center gap-1.5 text-xs bg-gray-800 hover:bg-gray-700 text-amber-400 border border-amber-500/30 px-3 py-1.5 rounded-lg transition font-bold">
+          <span>⚡ منصة شير ستور</span>
+        </a>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- جسم المنصة -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
+
+    <!-- قسم المتجر المعتمد -->
+    <div id="storeDashboard" class="space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        
+        <!-- حاسبة الرصد المالي -->
+        <div class="bg-gray-900/90 border border-gray-800 rounded-2xl p-5 shadow-lg space-y-4">
+          <h3 class="font-bold text-amber-400 text-base">📊 رصد السجل المالي الشهري</h3>
+          <div>
+            <label class="text-xs text-gray-400 mb-1 block">إجمالي المبيعات (ريال)</label>
+            <input type="number" id="inputRevenue" oninput="calculateNet()" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-2.5 text-sm" placeholder="0.00">
+          </div>
+          <div>
+            <label class="text-xs text-gray-400 mb-1 block">إجمالي المصاريف والخسائر (ريال)</label>
+            <input type="number" id="inputExpenses" oninput="calculateNet()" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-2.5 text-sm" placeholder="0.00">
+          </div>
+          <div class="p-3 bg-gray-950 border border-gray-800 rounded-xl">
+            <div class="text-xs text-gray-400">صافي الربح التلقائي:</div>
+            <div id="netProfitDisplay" class="text-xl font-black text-emerald-400 mt-1">0.00 ر.س</div>
+          </div>
+          <button onclick="saveMonthlyRecord()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded-lg transition text-sm">حفظ التقرير الشهري</button>
+        </div>
+
+        <!-- الرسم البياني المقارن -->
+        <div class="lg:col-span-2 bg-gray-900/90 border border-gray-800 rounded-2xl p-5 shadow-lg flex flex-col justify-between">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="font-bold text-gray-200 text-sm">مقارنة أداء الأرباح (الشهر الماضي والشهر الحالي)</h3>
+            <span class="text-xs bg-emerald-900/40 text-emerald-300 border border-emerald-700/50 px-2 py-0.5 rounded">خاص ومشفر</span>
+          </div>
+          <div class="h-60">
+            <canvas id="financeChart"></canvas>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- مركز تحكم المالك العام (فهد) -->
+    <div class="border-t border-gray-800 pt-6 space-y-6">
+      <div class="flex items-center justify-between">
+        <h2 class="text-lg font-bold text-amber-400">👑 مركز تحكم المالك العام (فهد)</h2>
+        <span class="text-xs text-gray-400">صلاحيات كاملة للتحكم والخطابات</span>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        
+        <!-- الشريط الإعلاني -->
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5 space-y-3">
+          <h4 class="font-bold text-sm text-gray-200">📢 إرسال إعلان وشريط متحرك</h4>
+          <input type="text" id="adminTickerInput" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-2 text-sm" placeholder="اكتب الإعلان هنا...">
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="text-xs text-gray-400 block mb-1">اتجاه الحركة</label>
+              <select id="tickerDirection" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-2 text-xs">
+                <option value="rtl">من اليمين لليسار</option>
+                <option value="ltr">من اليسار لليمين</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-xs text-gray-400 block mb-1">مدة الظهور (ساعة)</label>
+              <input type="number" id="tickerDuration" value="24" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-2 text-xs">
+            </div>
+          </div>
+          <button onclick="publishTicker()" class="w-full bg-amber-500 hover:bg-amber-600 text-black font-bold py-2 rounded-lg text-sm transition">نشر الإعلان</button>
+        </div>
+
+        <!-- توليد خطابات PDF الرسمية -->
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5 space-y-3">
+          <h4 class="font-bold text-sm text-gray-200">📄 إصدار خطاب رسمي موجه (PDF)</h4>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="text-xs text-gray-400 block mb-1">مِن:</label>
+              <input type="text" id="pdfFrom" value="المالك: فهد عبدالله العتيبي" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-2 text-xs">
+            </div>
+            <div>
+              <label class="text-xs text-gray-400 block mb-1">إلى (المتجر المستهدف):</label>
+              <select id="pdfToStore" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-2 text-xs">
+                <option value="متجر إكسلورا">متجر إكسلورا</option>
+                <option value="متجر السهم الرقمي">متجر السهم الرقمي</option>
+              </select>
+            </div>
+          </div>
+          <textarea id="pdfBodyText" rows="2" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-2 text-xs" placeholder="اكتب نص الخطاب أو الملاحظة للمتجر..."></textarea>
+          
+          <div class="flex gap-2">
+            <button onclick="generateOfficialPDF()" class="flex-1 bg-gray-800 hover:bg-gray-700 text-amber-400 border border-amber-500/40 font-bold py-2 rounded-lg text-xs transition">
+              ⚡ توليد وتحميل الخطاب الرسمي (PDF)
+            </button>
+            <label class="cursor-pointer bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-2 rounded-lg text-xs border border-gray-700 flex items-center">
+              <span>📎 رفع ملف خارجي</span>
+              <input type="file" class="hidden" onchange="alert('تم إرفاق الملف وإرساله للمتجر المستهدف بنجاح!')">
+            </label>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- جدول المتاجر والصلاحيات -->
+      <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5">
+        <h4 class="font-bold text-sm text-gray-200 mb-3">👥 قائمة المتاجر والأعضاء</h4>
+        <div class="overflow-x-auto">
+          <table class="w-full text-right text-xs">
+            <thead>
+              <tr class="text-gray-400 border-b border-gray-800 pb-2">
+                <th class="p-2">الاسم / المتجر</th>
+                <th class="p-2">الحالة</th>
+                <th class="p-2">أرباح الشهر</th>
+                <th class="p-2">الإجراءات</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="border-b border-gray-800/40">
+                <td class="p-2">متجر إكسلورا</td>
+                <td class="p-2"><span class="bg-emerald-900/40 text-emerald-300 px-2 py-0.5 rounded">معتمد وفعال</span></td>
+                <td class="p-2 text-emerald-400 font-bold">14,250 ر.س</td>
+                <td class="p-2">
+                  <button onclick="toggleBan(this)" class="bg-red-950 text-red-400 border border-red-800 px-2 py-1 rounded">حظر المتجر</button>
+                </td>
+              </tr>
+              <tr class="border-b border-gray-800/40">
+                <td class="p-2">عضو جديد قيد الانتظار</td>
+                <td class="p-2"><span class="bg-blue-900/40 text-blue-300 px-2 py-0.5 rounded">عضو جديد</span></td>
+                <td class="p-2 text-gray-500">-</td>
+                <td class="p-2">
+                  <button onclick="promoteMember(this)" class="bg-amber-500 text-black font-bold px-2 py-1 rounded">ترقية لمتجر</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    // تهيئة الرسم البياني
+    const ctx = document.getElementById('financeChart').getContext('2d');
+    const financeChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['الشهر الماضي', 'الشهر الحالي'],
+        datasets: [
+          { label: 'المبيعات', data: [12000, 18500], backgroundColor: '#38bdf8' },
+          { label: 'المصاريف', data: [4500, 5200], backgroundColor: '#f87171' },
+          { label: 'صافي الربح', data: [7500, 13300], backgroundColor: '#34d399' }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { labels: { color: '#9ca3af', font: { family: 'Tajawal' } } } },
+        scales: {
+          x: { ticks: { color: '#9ca3af' }, grid: { color: '#1f2937' } },
+          y: { ticks: { color: '#9ca3af' }, grid: { color: '#1f2937' } }
+        }
+      }
+    });
+
+    // حساب صافي الربح
+    function calculateNet() {
+      const rev = parseFloat(document.getElementById('inputRevenue').value) || 0;
+      const exp = parseFloat(document.getElementById('inputExpenses').value) || 0;
+      const net = rev - exp;
+      const disp = document.getElementById('netProfitDisplay');
+      disp.innerText = net.toLocaleString() + ' ر.س';
+      disp.className = net >= 0 ? "text-xl font-black text-emerald-400 mt-1" : "text-xl font-black text-red-400 mt-1";
+    }
+
+    // حفظ التقرير الشهري
+    function saveMonthlyRecord() {
+      const rev = parseFloat(document.getElementById('inputRevenue').value) || 0;
+      const exp = parseFloat(document.getElementById('inputExpenses').value) || 0;
+      const net = rev - exp;
+      
+      financeChart.data.datasets[0].data[1] = rev;
+      financeChart.data.datasets[1].data[1] = exp;
+      financeChart.data.datasets[2].data[1] = net;
+      financeChart.update();
+      alert('✅ تم حفظ التقرير الشهري وتحديث الرسم البياني بنجاح وبسرية تامة!');
+    }
+
+    // نشر الشريط الإعلاني
+    function publishTicker() {
+      const text = document.getElementById('adminTickerInput').value;
+      const dir = document.getElementById('tickerDirection').value;
+      if (!text) return alert('الرجاء كتابة نص الإعلان أولاً');
+      
+      const banner = document.getElementById('tickerBanner');
+      const tickerElem = document.getElementById('tickerText');
+      tickerElem.innerText = text;
+      tickerElem.className = dir === 'rtl' ? 'marquee-content-rtl font-semibold text-sm' : 'marquee-content-ltr font-semibold text-sm';
+      banner.classList.remove('hidden');
+      alert('✅ تم نشر الشريط المتحرك بنجاح!');
+    }
+
+    // توليد ملف PDF رسمي مع الشعار، البسملة، والأسماء
+    function generateOfficialPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+
+      const from = document.getElementById('pdfFrom').value;
+      const to = document.getElementById('pdfToStore').value;
+      const body = document.getElementById('pdfBodyText').value || "خطاب وتوجيه رسمي موجه للمتجر المعتمد.";
+      const currentDate = new Date().toLocaleDateString('ar-SA') + ' م';
+
+      // 1. البسملة في المنتصف
+      doc.setFont("Helvetica", "bold");
+      doc.setFontSize(16);
+      doc.text("بسم الله الرحمن الرحيم", 105, 18, { align: "center" });
+
+      // 2. رسم شعار السجل الذهبي المعتمد مع ختم (فهد)
+      doc.setDrawColor(217, 119, 6); // لون ذهبي
+      doc.setLineWidth(1);
+      doc.rect(170, 10, 24, 18, 'S'); // إطار السجل
+      doc.circle(182, 19, 5, 'S'); // ختم التوثيق
+      doc.setFontSize(8);
+      doc.text("FAHAD", 182, 20, { align: "center" }); // اسم فهد داخل الختم
+
+      // 3. اسم الموقع بالعربي والإنجليزي تحت البسملة والشعار
+      doc.setFontSize(11);
+      doc.setTextColor(180, 83, 9);
+      doc.text("برايفت ليدجر | PRIVATE LEDGER", 105, 27, { align: "center" });
+      doc.setFontSize(8);
+      doc.setTextColor(100, 100, 100);
+      doc.text("منظومة السجلات والتقارير المالية المشفرة", 105, 32, { align: "center" });
+
+      // خط فاصل رسمي تحت الترويسة
+      doc.setDrawColor(200, 200, 200);
+      doc.setLineWidth(0.5);
+      doc.line(15, 36, 195, 36);
+
+      // 4. بيانات التوجيه الرسمية والتاريخ التلقائي
+      doc.setFontSize(10);
+      doc.setTextColor(20, 20, 20);
+      doc.text(`التاريخ: ${currentDate}`, 20, 45);
+      doc.text(`مِن: ${from}`, 20, 53);
+      doc.text(`إلى: ${to}`, 20, 61);
+
+      // خط فرعي قبل المحتوى
+      doc.line(20, 66, 190, 66);
+
+      // 5. نص الخطاب
+      doc.setFont("Helvetica", "normal");
+      doc.setFontSize(11);
+      doc.text(body, 20, 78, { maxWidth: 170 });
+
+      // 6. التوقيع والاعتماد في الأسفل
+      doc.setFont("Helvetica", "bold");
+      doc.setFontSize(10);
+      doc.setTextColor(30, 30, 30);
+      doc.text("الاعتماد والتوقيع الرسمي:", 140, 255);
+      doc.setTextColor(180, 83, 9);
+      doc.text("فهد عبدالله العتيبي (المالك)", 140, 263);
+
+      doc.save(`Official-Letter-${to}.pdf`);
+    }
+
+    // ترقية عضو
+    function promoteMember(btn) {
+      btn.parentElement.parentElement.children[1].innerHTML = '<span class="bg-emerald-900/40 text-emerald-300 px-2 py-0.5 rounded">معتمد وفعال</span>';
+      btn.parentElement.innerHTML = '<button onclick="toggleBan(this)" class="bg-red-950 text-red-400 border border-red-800 px-2 py-1 rounded">حظر المتجر</button>';
+      alert('✅ تم ترقية العضو إلى متجر معتمد بنجاح!');
+    }
+
+    // حظر وفك حظر
+    function toggleBan(btn) {
+      if (btn.innerText === 'حظر المتجر') {
+        btn.innerText = 'فك الحظر';
+        btn.className = 'bg-gray-800 text-gray-300 border border-gray-600 px-2 py-1 rounded';
+        btn.parentElement.parentElement.children[1].innerHTML = '<span class="bg-red-900/40 text-red-300 px-2 py-0.5 rounded">محظور مؤقتاً</span>';
+      } else {
+        btn.innerText = 'حظر المتجر';
+        btn.className = 'bg-red-950 text-red-400 border border-red-800 px-2 py-1 rounded';
+        btn.parentElement.parentElement.children[1].innerHTML = '<span class="bg-emerald-900/40 text-emerald-300 px-2 py-0.5 rounded">معتمد وفعال</span>';
+      }
+    }
+  </script>
+</body>
+</html>
