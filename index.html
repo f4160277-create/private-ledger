@@ -43,7 +43,7 @@
         <p class="text-xs text-gray-400">بوابة الدخول المشفرة والآمنة</p>
       </div>
 
-      <!-- نموذج تسجيل الدخول -->
+      <!-- نموذج تسجيل الدخول المعتاد -->
       <div id="loginFormArea" class="space-y-4">
         <div>
           <label class="text-xs text-gray-400 block mb-1">البريد الإلكتروني</label>
@@ -77,7 +77,7 @@
         </button>
       </div>
 
-      <!-- نموذج إدخال كود الـ OTP -->
+      <!-- نموذج إدخال كود OTP -->
       <div id="otpVerifyArea" class="hidden space-y-4">
         <p class="text-xs text-emerald-400 text-center">تم إرسال كود التحقق بنجاح إلى بريدك!</p>
         <div>
@@ -93,6 +93,7 @@
 
   <!-- المنصة الرئيسية -->
   <div id="mainApp" class="hidden flex-1 flex flex-col">
+    
     <div id="tickerBanner" class="bg-amber-500/10 border-b border-amber-500/20 text-amber-300 py-2.5 px-4 hidden">
       <div class="max-w-7xl mx-auto marquee-container">
         <div id="tickerText" class="marquee-content-rtl font-semibold text-sm"></div>
@@ -133,6 +134,7 @@
     </header>
 
     <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
+
       <div id="memberNotice" class="hidden bg-blue-950/40 border border-blue-800/50 rounded-xl p-6 text-center space-y-2">
         <h3 class="text-blue-300 font-bold text-base">تم التحقق من بريدك بنجاح وأنت مسجل كـ "عضو جديد"</h3>
         <p class="text-xs text-gray-400 max-w-md mx-auto">حسابك بانتظار اعتماد وترقية المالك العام (فهد) لتتمكن من رصد الأرباح وتفعيل المتجر.</p>
@@ -250,12 +252,14 @@
           </div>
         </div>
       </div>
+
     </main>
   </div>
 
   <script>
+    // إعدادات وتكامل EmailJS
     const EMAILJS_SERVICE_ID  = "service_gkqsf5i";
-    const EMAILJS_TEMPLATE_ID = "rkw547i";
+    const EMAILJS_TEMPLATE_ID = "template_1cnf5f4";
     const EMAILJS_PUBLIC_KEY  = "oKlL4C-ot8SHjWoZ1";
 
     emailjs.init(EMAILJS_PUBLIC_KEY);
@@ -274,6 +278,7 @@
       document.getElementById('loginFormArea').classList.remove('hidden');
     }
 
+    // دالة إرسال كود OTP
     async function sendOtpCode() {
       const userEmail = document.getElementById('regEmail').value.trim();
       if (!userEmail || !userEmail.includes('@')) {
@@ -300,13 +305,14 @@
         alert('📩 تم إرسال كود التحقق بنجاح إلى بريدك!');
       } catch (err) {
         console.error("EmailJS Error:", err);
-        alert('حدث خطأ أثناء الإرسال. تأكد من الضغط على Save في صفحة EmailJS وحاول مجدداً.');
+        alert('تفاصيل الخطأ: ' + (err.text || err.message || JSON.stringify(err)));
       } finally {
         btn.innerText = "📩 إرسال كود التحقق للبريد";
         btn.disabled = false;
       }
     }
 
+    // التحقق من كود OTP
     function verifyOtpCode() {
       const code = document.getElementById('enteredOtp').value.trim();
       if (code === generatedOtp) {
@@ -330,6 +336,7 @@
       }
     }
 
+    // تشفير SHA-256 للمالك
     async function sha256(str) {
       const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
       return Array.prototype.map.call(new Uint8Array(buf), x => (('00' + x.toString(16)).slice(-2))).join('');
