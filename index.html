@@ -257,12 +257,10 @@
   </div>
 
   <script>
-    // إعدادات EmailJS بالمفتاح الدقيق
-    const EMAILJS_SERVICE_ID  = "service_gkqsf5i";
-    const EMAILJS_TEMPLATE_ID = "template_1cnf5f4";
-    const EMAILJS_PUBLIC_KEY  = "oKlL4c-ot8SHjWoZ1";
-
-    emailjs.init(EMAILJS_PUBLIC_KEY);
+    // تمرير المعرفات مع المفتاح المحدث
+    const SERVICE_ID  = "service_gkqsf5i";
+    const TEMPLATE_ID = "template_1cnf5f4";
+    const PUBLIC_KEY  = "oKlL4c-ot8SHjWoZ1";
 
     let generatedOtp = null;
     let pendingUserEmail = "";
@@ -299,7 +297,11 @@
       };
 
       try {
-        await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
+        // إرسال مع تمرير المفتاح العام كمعامل رابع صريح
+        await emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams, {
+          publicKey: PUBLIC_KEY
+        });
+        
         document.getElementById('registerFormArea').classList.add('hidden');
         document.getElementById('otpVerifyArea').classList.remove('hidden');
         alert('📩 تم إرسال كود التحقق بنجاح إلى بريدك!');
@@ -336,7 +338,7 @@
       }
     }
 
-    // تشفير حساب المالك
+    // تشفير SHA-256 للمالك
     async function sha256(str) {
       const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
       return Array.prototype.map.call(new Uint8Array(buf), x => (('00' + x.toString(16)).slice(-2))).join('');
