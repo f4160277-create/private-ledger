@@ -34,12 +34,12 @@
             </linearGradient>
           </defs>
           <path d="M15 32C15 32 35 24 60 24C85 24 105 32 105 32V88C105 88 85 80 60 80C35 80 15 88 15 88V32Z" fill="#1e293b" stroke="url(#goldLogin)" stroke-width="4"/>
-          <line x1="60" y1="24" x2="60" y2="80" stroke="url(#goldLogin)" stroke-width="4"/>
+          <line x1="60" y1="24" x2="60" y2="80" stroke="url(#goldHead)" stroke-width="4"/>
           <circle cx="60" cy="56" r="18" fill="#0b0f19" stroke="url(#goldLogin)" stroke-width="3"/>
           <text x="60" y="62" text-anchor="middle" fill="url(#goldLogin)" font-size="13" font-weight="900">فهد</text>
         </svg>
         <h2 class="text-xl font-black gold-text">PRIVATE LEDGER</h2>
-        <p class="text-xs text-gray-400">بوابة الدخول المشفرة والآمنة</p>
+        <p class="text-xs text-gray-400">بوابة الدخول المشفرة والسحابية</p>
       </div>
 
       <!-- نموذج تسجيل الدخول المعتاد -->
@@ -52,7 +52,7 @@
           <label class="text-xs text-gray-400 block mb-1">كلمة المرور</label>
           <input type="password" id="loginPassword" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-3 text-sm text-white focus:border-amber-500 outline-none" placeholder="••••••••">
         </div>
-        <button onclick="handleLogin()" class="w-full bg-amber-500 hover:bg-amber-600 text-black font-bold py-3 rounded-lg text-sm transition">
+        <button id="loginBtn" onclick="handleLogin()" class="w-full bg-amber-500 hover:bg-amber-600 text-black font-bold py-3 rounded-lg text-sm transition">
           تسجيل الدخول
         </button>
         <div class="border-t border-gray-800 pt-4 text-center">
@@ -87,8 +87,8 @@
           <label class="text-xs text-gray-400 block mb-1">رمز التحقق (OTP)</label>
           <input type="text" id="enteredOtp" maxlength="6" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-3 text-center text-lg font-bold tracking-widest text-amber-400 outline-none" placeholder="123456">
         </div>
-        <button onclick="verifyOtpCode()" class="w-full bg-amber-500 hover:bg-amber-600 text-black font-bold py-3 rounded-lg text-sm transition">
-          تأكيد وإنشاء الحساب
+        <button id="verifyOtpBtn" onclick="verifyOtpCode()" class="w-full bg-amber-500 hover:bg-amber-600 text-black font-bold py-3 rounded-lg text-sm transition">
+          تأكيد وإنشاء الحساب سحابياً
         </button>
       </div>
     </div>
@@ -138,10 +138,10 @@
 
     <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
 
-      <!-- تنبيه العضو حسب الحالة -->
+      <!-- تنبيه العضو -->
       <div id="memberNotice" class="hidden bg-blue-950/40 border border-blue-800/50 rounded-xl p-6 text-center space-y-2">
         <h3 id="memberNoticeTitle" class="text-blue-300 font-bold text-base">تم التحقق من بريدك وحسابك قيد المراجعة</h3>
-        <p id="memberNoticeBody" class="text-xs text-gray-400 max-w-md mx-auto">طلبك معروض حالياً لدى المالك العام (فهد) للترقية والاعتماد.</p>
+        <p id="memberNoticeBody" class="text-xs text-gray-400 max-w-md mx-auto">طلبك معروض حالياً لدى المالك العام (فهد) للترقية والاعتماد السحابي.</p>
       </div>
 
       <!-- قسم إدارة وسجلات المتجر -->
@@ -161,13 +161,13 @@
               <div class="text-xs text-gray-400">صافي الربح التلقائي:</div>
               <div id="netProfitDisplay" class="text-xl font-black text-emerald-400 mt-1">0.00 ر.س</div>
             </div>
-            <button onclick="saveMonthlyRecord()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded-lg transition text-sm">حفظ التقرير الشهري</button>
+            <button onclick="saveMonthlyRecord()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded-lg transition text-sm">حفظ التقرير ومزامنته سحابياً</button>
           </div>
 
           <div class="lg:col-span-2 bg-gray-900/90 border border-gray-800 rounded-2xl p-5 shadow-lg flex flex-col justify-between">
             <div class="flex items-center justify-between mb-3">
-              <h3 class="font-bold text-gray-200 text-sm">مقارنة أداء الأرباح (الشهر الماضي والشهر الحالي)</h3>
-              <span class="text-xs bg-emerald-900/40 text-emerald-300 border border-emerald-700/50 px-2 py-0.5 rounded">خاص ومشفر</span>
+              <h3 class="font-bold text-gray-200 text-sm">مقارنة أداء الأرباح (الشهر الحالي)</h3>
+              <span class="text-xs bg-emerald-900/40 text-emerald-300 border border-emerald-700/50 px-2 py-0.5 rounded">مشفر ومزامن سحابياً</span>
             </div>
             <div class="h-60">
               <canvas id="financeChart"></canvas>
@@ -180,7 +180,7 @@
       <div id="ownerSection" class="hidden border-t border-gray-800 pt-6 space-y-6">
         <div class="flex items-center justify-between">
           <h2 class="text-lg font-bold text-amber-400">👑 مركز تحكم المالك العام (فهد)</h2>
-          <span class="text-xs text-emerald-400 font-bold">جلسة مشفرة وآمنة</span>
+          <span class="text-xs text-emerald-400 font-bold">جلسة سحابية مشفرة</span>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
@@ -200,7 +200,7 @@
                 <input type="number" id="tickerDuration" value="24" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-2 text-xs">
               </div>
             </div>
-            <button onclick="publishTicker()" class="w-full bg-amber-500 hover:bg-amber-600 text-black font-bold py-2 rounded-lg text-sm transition">نشر الإعلان</button>
+            <button onclick="publishTicker()" class="w-full bg-amber-500 hover:bg-amber-600 text-black font-bold py-2 rounded-lg text-sm transition">نشر الإعلان للجميع سحابياً</button>
           </div>
 
           <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5 space-y-3">
@@ -227,11 +227,11 @@
           </div>
         </div>
 
-        <!-- جدول الحسابات وطلبات الانضمام -->
+        <!-- جدول الحسابات وطلبات الانضمام السحابية -->
         <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5">
           <div class="flex items-center justify-between mb-3">
-            <h4 class="font-bold text-sm text-gray-200">👥 إدارة طلبات الانضمام والمتاجر</h4>
-            <button onclick="clearAllData()" class="text-xs text-red-400 hover:underline">تصفير كافة الحسابات السابقة</button>
+            <h4 class="font-bold text-sm text-gray-200">👥 إدارة طلبات الانضمام والمتاجر (مزامنة فورية)</h4>
+            <button onclick="fetchCloudUsers()" class="text-xs bg-gray-800 hover:bg-gray-700 text-amber-400 px-2.5 py-1 rounded border border-gray-700">🔄 تحديث القائمة</button>
           </div>
           <div class="overflow-x-auto">
             <table class="w-full text-right text-xs">
@@ -244,7 +244,7 @@
                 </tr>
               </thead>
               <tbody id="memberTableBody">
-                <!-- يتم التوليد ديناميكياً -->
+                <!-- يتم التحميل من السحابة -->
               </tbody>
             </table>
           </div>
@@ -256,6 +256,7 @@
 
   <script>
     const WEB3FORMS_KEY = "fac45831-7eb4-4432-a856-83d70deb5549";
+    const FIREBASE_DB_URL = "https://privateledger-29916-default-rtdb.firebaseio.com";
 
     let generatedOtp = null;
     let pendingEmail = "";
@@ -271,13 +272,9 @@
       return Array.prototype.map.call(new Uint8Array(buf), x => (('00' + x.toString(16)).slice(-2))).join('');
     }
 
-    // إدارة قاعدة البيانات المحلية
-    function getUsersDB() {
-      return JSON.parse(localStorage.getItem('pl_users_db') || '[]');
-    }
-
-    function saveUsersDB(db) {
-      localStorage.setItem('pl_users_db', JSON.stringify(db));
+    // تنظيف الإيميل ليكون مفتاحاً متوافقاً في Firebase
+    function sanitizeEmailKey(email) {
+      return btoa(email).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
     }
 
     function showRegisterForm() {
@@ -331,37 +328,47 @@
       }
     }
 
-    // تأكيد كود OTP وتسجيل الحساب
+    // تأكيد كود OTP وحفظ الحساب سحابياً في Firebase
     async function verifyOtpCode() {
       const code = document.getElementById('enteredOtp').value.trim();
       if (code !== generatedOtp) return alert('❌ كود التحقق غير صحيح!');
 
-      const passHash = await sha256(pendingPass);
-      const db = getUsersDB();
+      const btn = document.getElementById('verifyOtpBtn');
+      btn.innerText = "⏳ جاري حفظ البيانات سحابياً...";
+      btn.disabled = true;
 
-      const existingIndex = db.findIndex(u => u.email === pendingEmail);
-      const newUser = {
+      const passHash = await sha256(pendingPass);
+      const emailKey = sanitizeEmailKey(pendingEmail);
+
+      const userData = {
         email: pendingEmail,
         passHash: passHash,
-        status: 'PENDING', // PENDING (معلق), APPROVED (معتمد), REJECTED (مرفوض)
+        status: 'PENDING',
         revenue: 0,
         expenses: 0,
-        net: 0
+        net: 0,
+        timestamp: Date.now()
       };
 
-      if (existingIndex > -1) {
-        db[existingIndex] = newUser;
-      } else {
-        db.push(newUser);
-      }
+      try {
+        await fetch(`${FIREBASE_DB_URL}/users/${emailKey}.json`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(userData)
+        });
 
-      saveUsersDB(db);
-      currentUser = newUser;
-      alert('✅ تم إنشاء الحساب بنجاح! حسابك بانتظار اعتماد المالك.');
-      launchDashboard();
+        currentUser = userData;
+        alert('✅ تم إنشاء الحساب ومزامنته سحابياً بنجاح! بانتظار اعتماد المالك.');
+        launchDashboard();
+      } catch (err) {
+        alert('حدث خطأ أثناء الاتصال بقاعدة البيانات السحابية');
+      } finally {
+        btn.innerText = "تأكيد وإنشاء الحساب سحابياً";
+        btn.disabled = false;
+      }
     }
 
-    // تسجيل الدخول
+    // تسجيل الدخول السحابي المشفر
     async function handleLogin() {
       const email = document.getElementById('loginEmail').value.trim().toLowerCase();
       const pass = document.getElementById('loginPassword').value.trim();
@@ -376,20 +383,31 @@
         return;
       }
 
-      // تحقق الأعضاء والمتاجر
-      const db = getUsersDB();
-      const user = db.find(u => u.email === email && u.passHash === inputPassHash);
+      // تحقق الأعضاء والمتاجر من قاعدة البيانات السحابية
+      const btn = document.getElementById('loginBtn');
+      btn.innerText = "⏳ جاري التحقق...";
+      btn.disabled = true;
 
-      if (user) {
-        currentUser = user;
-        launchDashboard();
-        return;
+      try {
+        const emailKey = sanitizeEmailKey(email);
+        const res = await fetch(`${FIREBASE_DB_URL}/users/${emailKey}.json`);
+        const user = await res.json();
+
+        if (user && user.passHash === inputPassHash) {
+          currentUser = user;
+          launchDashboard();
+        } else {
+          alert('❌ البريد الإلكتروني أو كلمة المرور غير صحيحة!');
+        }
+      } catch (err) {
+        alert('تعذر التحقق من البيانات، تأكد من اتصال الإنترنت.');
+      } finally {
+        btn.innerText = "تسجيل الدخول";
+        btn.disabled = false;
       }
-
-      alert('❌ البريد الإلكتروني أو كلمة المرور غير صحيحة!');
     }
 
-    // تشغيل لوحة التحكم حسب نوع الحساب وحالته
+    // تشغيل اللوحة
     function launchDashboard() {
       document.getElementById('loginScreen').classList.add('hidden');
       document.getElementById('mainApp').classList.remove('hidden');
@@ -399,13 +417,15 @@
       const storeSec = document.getElementById('storeSection');
       const memNotice = document.getElementById('memberNotice');
 
+      loadCloudTicker();
+
       if (currentUser.role === 'OWNER') {
         badge.innerText = 'حساب المالك العام (فهد)';
         badge.className = 'text-[11px] text-amber-400 font-bold';
         ownerSec.classList.remove('hidden');
         storeSec.classList.add('hidden');
         memNotice.classList.add('hidden');
-        renderOwnerTable();
+        fetchCloudUsers();
       } else if (currentUser.status === 'APPROVED') {
         badge.innerText = `متجر معتمد (${currentUser.email})`;
         badge.className = 'text-[11px] text-emerald-400 font-bold';
@@ -421,78 +441,85 @@
         memNotice.classList.remove('hidden');
         document.getElementById('memberNoticeTitle').innerText = 'تم رفض طلب الانضمام';
         document.getElementById('memberNoticeTitle').className = 'text-red-400 font-bold text-base';
-        document.getElementById('memberNoticeBody').innerText = 'نعتذر منك، لم تتم الموافقة على ترقية حسابك إلى متجر معتمد من قِبل المالك.';
+        document.getElementById('memberNoticeBody').innerText = 'نعتذر منك، لم تتم الموافقة على تفعيل المتجر من قِبل المالك.';
       } else {
         badge.innerText = 'عضو جديد (قيد المراجعة)';
         badge.className = 'text-[11px] text-blue-400 font-bold';
         ownerSec.classList.add('hidden');
         storeSec.classList.add('hidden');
         memNotice.classList.remove('hidden');
-        document.getElementById('memberNoticeTitle').innerText = 'طلبك قيد المراجعة والاعتماد';
+        document.getElementById('memberNoticeTitle').innerText = 'طلبك قيد المراجعة والاعتماد السحابي';
         document.getElementById('memberNoticeTitle').className = 'text-blue-300 font-bold text-base';
-        document.getElementById('memberNoticeBody').innerText = 'حسابك مسجل وبانتظار قرار الترقية من المالك العام (فهد).';
+        document.getElementById('memberNoticeBody').innerText = 'تم تسجيل حسابك وهو معروض في لوحة المالك العام (فهد) بانتظار الترقية.';
       }
     }
 
-    // بناء جدول المالك
-    function renderOwnerTable() {
-      const db = getUsersDB();
+    // جلب طلبات الأعضاء من السحابة لشاشة المالك
+    async function fetchCloudUsers() {
       const tbody = document.getElementById('memberTableBody');
       const pdfSelect = document.getElementById('pdfToStore');
-      tbody.innerHTML = '';
+      tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-gray-400">⏳ جاري مزامنة الحسابات من السحابة...</td></tr>';
       pdfSelect.innerHTML = '<option value="كافة المتاجر المعتمدة">كافة المتاجر المعتمدة</option>';
 
-      if (db.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-gray-500">لا توجد أي طلبات أو حسابات مسجلة حالياً.</td></tr>';
-        return;
-      }
+      try {
+        const res = await fetch(`${FIREBASE_DB_URL}/users.json`);
+        const data = await res.json();
+        tbody.innerHTML = '';
 
-      db.forEach((user, index) => {
-        let statusBadge = '';
-        let actionButtons = '';
-
-        if (user.status === 'APPROVED') {
-          statusBadge = '<span class="bg-emerald-900/40 text-emerald-300 border border-emerald-700/50 px-2 py-0.5 rounded">متجر معتمد وفعال</span>';
-          actionButtons = `<button onclick="updateUserStatus(${index}, 'REJECTED')" class="bg-red-950 hover:bg-red-900 text-red-300 border border-red-800 px-2.5 py-1 rounded transition text-xs">تعطيل / رفض</button>`;
-          pdfSelect.innerHTML += `<option value="${user.email}">${user.email}</option>`;
-        } else if (user.status === 'REJECTED') {
-          statusBadge = '<span class="bg-red-950/60 text-red-400 border border-red-800 px-2 py-0.5 rounded">طلب مرفوض</span>';
-          actionButtons = `<button onclick="updateUserStatus(${index}, 'APPROVED')" class="bg-emerald-700 hover:bg-emerald-600 text-white font-bold px-2.5 py-1 rounded transition text-xs">قبول وترقية</button>`;
-        } else {
-          statusBadge = '<span class="bg-amber-900/40 text-amber-300 border border-amber-700/50 px-2 py-0.5 rounded">بانتظار المراجعة</span>';
-          actionButtons = `
-            <div class="flex gap-1.5">
-              <button onclick="updateUserStatus(${index}, 'APPROVED')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-2.5 py-1 rounded transition text-xs">قبول وترقية</button>
-              <button onclick="updateUserStatus(${index}, 'REJECTED')" class="bg-red-900/70 hover:bg-red-800 text-red-300 px-2.5 py-1 rounded transition text-xs">رفض</button>
-            </div>
-          `;
+        if (!data) {
+          tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-gray-500">لا توجد طلبات أو حسابات مسجلة حالياً.</td></tr>';
+          return;
         }
 
-        const tr = document.createElement('tr');
-        tr.className = "border-b border-gray-800/40";
-        tr.innerHTML = `
-          <td class="p-2 font-mono text-gray-300">${user.email}</td>
-          <td class="p-2">${statusBadge}</td>
-          <td class="p-2 text-emerald-400 font-bold">${user.status === 'APPROVED' ? (user.net || 0).toLocaleString() + ' ر.س' : '-'}</td>
-          <td class="p-2">${actionButtons}</td>
-        `;
-        tbody.appendChild(tr);
-      });
+        Object.keys(data).forEach(key => {
+          const user = data[key];
+          let statusBadge = '';
+          let actionButtons = '';
+
+          if (user.status === 'APPROVED') {
+            statusBadge = '<span class="bg-emerald-900/40 text-emerald-300 border border-emerald-700/50 px-2 py-0.5 rounded">متجر معتمد وفعال</span>';
+            actionButtons = `<button onclick="updateCloudStatus('${key}', 'REJECTED')" class="bg-red-950 hover:bg-red-900 text-red-300 border border-red-800 px-2.5 py-1 rounded transition text-xs">تعطيل / رفض</button>`;
+            pdfSelect.innerHTML += `<option value="${user.email}">${user.email}</option>`;
+          } else if (user.status === 'REJECTED') {
+            statusBadge = '<span class="bg-red-950/60 text-red-400 border border-red-800 px-2 py-0.5 rounded">طلب مرفوض</span>';
+            actionButtons = `<button onclick="updateCloudStatus('${key}', 'APPROVED')" class="bg-emerald-700 hover:bg-emerald-600 text-white font-bold px-2.5 py-1 rounded transition text-xs">قبول وترقية</button>`;
+          } else {
+            statusBadge = '<span class="bg-amber-900/40 text-amber-300 border border-amber-700/50 px-2 py-0.5 rounded">بانتظار المراجعة</span>';
+            actionButtons = `
+              <div class="flex gap-1.5">
+                <button onclick="updateCloudStatus('${key}', 'APPROVED')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-2.5 py-1 rounded transition text-xs">قبول وترقية</button>
+                <button onclick="updateCloudStatus('${key}', 'REJECTED')" class="bg-red-900/70 hover:bg-red-800 text-red-300 px-2.5 py-1 rounded transition text-xs">رفض</button>
+              </div>
+            `;
+          }
+
+          const tr = document.createElement('tr');
+          tr.className = "border-b border-gray-800/40";
+          tr.innerHTML = `
+            <td class="p-2 font-mono text-gray-300">${user.email}</td>
+            <td class="p-2">${statusBadge}</td>
+            <td class="p-2 text-emerald-400 font-bold">${user.status === 'APPROVED' ? (user.net || 0).toLocaleString() + ' ر.س' : '-'}</td>
+            <td class="p-2">${actionButtons}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } catch (e) {
+        tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-red-400">حدث خطأ أثناء جلب البيانات السحابية</td></tr>';
+      }
     }
 
-    function updateUserStatus(index, newStatus) {
-      const db = getUsersDB();
-      db[index].status = newStatus;
-      saveUsersDB(db);
-      renderOwnerTable();
-      alert(newStatus === 'APPROVED' ? '✅ تم قبول وترقية الحساب إلى متجر معتمد!' : '🚫 تم رفض الحساب بنجاح.');
-    }
-
-    function clearAllData() {
-      if (confirm('هل أنت متأكد من تصفير وحذف كافة الحسابات والبيانات السابقة؟')) {
-        localStorage.removeItem('pl_users_db');
-        renderOwnerTable();
-        alert('تم تصفير كافة الحسابات بنجاح.');
+    // تحديث حالة الحساب سحابياً
+    async function updateCloudStatus(emailKey, newStatus) {
+      try {
+        await fetch(`${FIREBASE_DB_URL}/users/${emailKey}/status.json`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newStatus)
+        });
+        alert(newStatus === 'APPROVED' ? '✅ تم قبول وترقية الحساب إلى متجر معتمد سحابياً!' : '🚫 تم رفض الحساب بنجاح.');
+        fetchCloudUsers();
+      } catch (e) {
+        alert('تعذر تحديث الحالة في السحابة');
       }
     }
 
@@ -510,11 +537,11 @@
       financeChart = new Chart(ctx, {
         type: 'bar',
         data: {
-          labels: ['الشهر الماضي (افتتاحي)', 'الشهر الحالي'],
+          labels: ['الشهر الحالي'],
           datasets: [
-            { label: 'المبيعات', data: [0, rev], backgroundColor: '#38bdf8' },
-            { label: 'المصاريف', data: [0, exp], backgroundColor: '#f87171' },
-            { label: 'صافي الربح', data: [0, net], backgroundColor: '#34d399' }
+            { label: 'المبيعات', data: [rev], backgroundColor: '#38bdf8' },
+            { label: 'المصاريف', data: [exp], backgroundColor: '#f87171' },
+            { label: 'صافي الربح', data: [net], backgroundColor: '#34d399' }
           ]
         },
         options: {
@@ -538,35 +565,59 @@
       disp.className = net >= 0 ? "text-xl font-black text-emerald-400 mt-1" : "text-xl font-black text-red-400 mt-1";
     }
 
-    function saveMonthlyRecord() {
+    async function saveMonthlyRecord() {
       const rev = parseFloat(document.getElementById('inputRevenue').value) || 0;
       const exp = parseFloat(document.getElementById('inputExpenses').value) || 0;
       const net = rev - exp;
+      const emailKey = sanitizeEmailKey(currentUser.email);
 
-      const db = getUsersDB();
-      const userIndex = db.findIndex(u => u.email === currentUser.email);
-      if (userIndex > -1) {
-        db[userIndex].revenue = rev;
-        db[userIndex].expenses = exp;
-        db[userIndex].net = net;
-        saveUsersDB(db);
+      try {
+        await fetch(`${FIREBASE_DB_URL}/users/${emailKey}.json`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ revenue: rev, expenses: exp, net: net })
+        });
+        currentUser.revenue = rev;
+        currentUser.expenses = exp;
+        currentUser.net = net;
+        initChart(rev, exp, net);
+        alert('✅ تم حفظ التقرير الشهري وتحديثه سحابياً بنجاح!');
+      } catch (e) {
+        alert('تعذر حفظ البيانات في السحابة');
       }
-
-      initChart(rev, exp, net);
-      alert('✅ تم حفظ التقرير الشهري للأرباح بنجاح وبسرية تامة!');
     }
 
-    function publishTicker() {
+    // نشر الإعلان السحابي
+    async function publishTicker() {
       const text = document.getElementById('adminTickerInput').value;
       const dir = document.getElementById('tickerDirection').value;
       if (!text) return alert('الرجاء كتابة نص الإعلان أولاً');
-      
-      const banner = document.getElementById('tickerBanner');
-      const tickerElem = document.getElementById('tickerText');
-      tickerElem.innerText = text;
-      tickerElem.className = dir === 'rtl' ? 'marquee-content-rtl font-semibold text-sm' : 'marquee-content-ltr font-semibold text-sm';
-      banner.classList.remove('hidden');
-      alert('✅ تم نشر الشريط المتحرك بنجاح!');
+
+      try {
+        await fetch(`${FIREBASE_DB_URL}/ticker.json`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: text, dir: dir, timestamp: Date.now() })
+        });
+        alert('✅ تم نشر الشريط المتحرك لجميع المستخدمين سحابياً!');
+        loadCloudTicker();
+      } catch (e) {
+        alert('تعذر نشر الإعلان');
+      }
+    }
+
+    async function loadCloudTicker() {
+      try {
+        const res = await fetch(`${FIREBASE_DB_URL}/ticker.json`);
+        const ticker = await res.json();
+        if (ticker && ticker.text) {
+          const banner = document.getElementById('tickerBanner');
+          const tickerElem = document.getElementById('tickerText');
+          tickerElem.innerText = ticker.text;
+          tickerElem.className = ticker.dir === 'rtl' ? 'marquee-content-rtl font-semibold text-sm' : 'marquee-content-ltr font-semibold text-sm';
+          banner.classList.remove('hidden');
+        }
+      } catch (e) {}
     }
 
     function generateOfficialPDF() {
