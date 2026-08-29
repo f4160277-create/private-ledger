@@ -7,6 +7,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- مكتبة EmailJS -->
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   
   <style>
@@ -43,7 +44,7 @@
         <p class="text-xs text-gray-400">بوابة الدخول المشفرة والآمنة</p>
       </div>
 
-      <!-- نموذج تسجيل الدخول المعتاد -->
+      <!-- نموذج تسجيل الدخول -->
       <div id="loginFormArea" class="space-y-4">
         <div>
           <label class="text-xs text-gray-400 block mb-1">البريد الإلكتروني</label>
@@ -93,7 +94,6 @@
 
   <!-- المنصة الرئيسية -->
   <div id="mainApp" class="hidden flex-1 flex flex-col">
-    
     <div id="tickerBanner" class="bg-amber-500/10 border-b border-amber-500/20 text-amber-300 py-2.5 px-4 hidden">
       <div class="max-w-7xl mx-auto marquee-container">
         <div id="tickerText" class="marquee-content-rtl font-semibold text-sm"></div>
@@ -134,7 +134,6 @@
     </header>
 
     <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
-
       <div id="memberNotice" class="hidden bg-blue-950/40 border border-blue-800/50 rounded-xl p-6 text-center space-y-2">
         <h3 class="text-blue-300 font-bold text-base">تم التحقق من بريدك بنجاح وأنت مسجل كـ "عضو جديد"</h3>
         <p class="text-xs text-gray-400 max-w-md mx-auto">حسابك بانتظار اعتماد وترقية المالك العام (فهد) لتتمكن من رصد الأرباح وتفعيل المتجر.</p>
@@ -252,15 +251,20 @@
           </div>
         </div>
       </div>
-
     </main>
   </div>
 
   <script>
-    // تمرير المعرفات مع المفتاح المحدث
-    const SERVICE_ID  = "service_gkqsf5i";
-    const TEMPLATE_ID = "template_1cnf5f4";
-    const PUBLIC_KEY  = "oKlL4c-ot8SHjWoZ1";
+    // تهيئة المتغيرات
+    const EMAILJS_SERVICE_ID  = "service_gkqsf5i";
+    const EMAILJS_TEMPLATE_ID = "template_1cnf5f4";
+    const EMAILJS_PUBLIC_KEY  = "oKlL4c-ot8SHjWoZ1";
+
+    (function() {
+      emailjs.init({
+        publicKey: EMAILJS_PUBLIC_KEY
+      });
+    })();
 
     let generatedOtp = null;
     let pendingUserEmail = "";
@@ -276,7 +280,6 @@
       document.getElementById('loginFormArea').classList.remove('hidden');
     }
 
-    // إرسال كود التحقق OTP
     async function sendOtpCode() {
       const userEmail = document.getElementById('regEmail').value.trim();
       if (!userEmail || !userEmail.includes('@')) {
@@ -297,11 +300,7 @@
       };
 
       try {
-        // إرسال مع تمرير المفتاح العام كمعامل رابع صريح
-        await emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams, {
-          publicKey: PUBLIC_KEY
-        });
-        
+        await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
         document.getElementById('registerFormArea').classList.add('hidden');
         document.getElementById('otpVerifyArea').classList.remove('hidden');
         alert('📩 تم إرسال كود التحقق بنجاح إلى بريدك!');
@@ -314,7 +313,6 @@
       }
     }
 
-    // التحقق من كود OTP
     function verifyOtpCode() {
       const code = document.getElementById('enteredOtp').value.trim();
       if (code === generatedOtp) {
@@ -338,7 +336,6 @@
       }
     }
 
-    // تشفير SHA-256 للمالك
     async function sha256(str) {
       const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
       return Array.prototype.map.call(new Uint8Array(buf), x => (('00' + x.toString(16)).slice(-2))).join('');
