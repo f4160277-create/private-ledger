@@ -35,7 +35,7 @@
             </linearGradient>
           </defs>
           <path d="M15 32C15 32 35 24 60 24C85 24 105 32 105 32V88C105 88 85 80 60 80C35 80 15 88 15 88V32Z" fill="#1e293b" stroke="url(#goldLogin)" stroke-width="4"/>
-          <line x1="60" y1="24" x2="60" y2="80" stroke="url(#goldLogin)" stroke-width="4"/>
+          <line x1="60" y1="24" x2="60" y2="80" stroke="url(#goldHead)" stroke-width="4"/>
           <circle cx="60" cy="56" r="18" fill="#0b0f19" stroke="url(#goldLogin)" stroke-width="3"/>
           <text x="60" y="62" text-anchor="middle" fill="url(#goldLogin)" font-size="13" font-weight="900">فهد</text>
         </svg>
@@ -257,10 +257,10 @@
   </div>
 
   <script>
-    // إعدادات وتكامل EmailJS
+    // إعدادات EmailJS بالمفتاح الدقيق
     const EMAILJS_SERVICE_ID  = "service_gkqsf5i";
     const EMAILJS_TEMPLATE_ID = "template_1cnf5f4";
-    const EMAILJS_PUBLIC_KEY  = "oKlL4C-ot8SHjWoZ1";
+    const EMAILJS_PUBLIC_KEY  = "oKlL4c-ot8SHjWoZ1";
 
     emailjs.init(EMAILJS_PUBLIC_KEY);
 
@@ -278,7 +278,7 @@
       document.getElementById('loginFormArea').classList.remove('hidden');
     }
 
-    // دالة إرسال كود OTP
+    // إرسال كود التحقق OTP
     async function sendOtpCode() {
       const userEmail = document.getElementById('regEmail').value.trim();
       if (!userEmail || !userEmail.includes('@')) {
@@ -336,7 +336,7 @@
       }
     }
 
-    // تشفير SHA-256 للمالك
+    // تشفير حساب المالك
     async function sha256(str) {
       const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
       return Array.prototype.map.call(new Uint8Array(buf), x => (('00' + x.toString(16)).slice(-2))).join('');
