@@ -7,6 +7,8 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- مكتبة EmailJS الرسمية -->
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap');
@@ -19,212 +21,427 @@
     @keyframes marquee-ltr { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
   </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col justify-between">
 
-  <!-- الشريط الإعلاني المتحرك للمالك -->
-  <div id="tickerBanner" class="bg-amber-500/10 border-b border-amber-500/20 text-amber-300 py-2.5 px-4 hidden">
-    <div class="max-w-7xl mx-auto marquee-container">
-      <div id="tickerText" class="marquee-content-rtl font-semibold text-sm"></div>
-    </div>
-  </div>
-
-  <!-- ترويسة الموقع -->
-  <header class="border-b border-gray-800 bg-[#111827]/90 backdrop-blur sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-      
-      <!-- الشعار في الموقع -->
-      <div class="flex items-center gap-3">
-        <svg width="46" height="46" viewBox="0 0 120 120" fill="none" class="shrink-0">
+  <!-- شاشة الدخول وتسجيل الأعضاء -->
+  <div id="loginScreen" class="fixed inset-0 bg-[#0b0f19] z-50 flex items-center justify-center p-4">
+    <div class="bg-[#111827] border border-amber-500/30 rounded-2xl p-6 sm:p-8 w-full max-w-md shadow-2xl space-y-6">
+      <div class="text-center space-y-2">
+        <svg width="60" height="60" viewBox="0 0 120 120" fill="none" class="mx-auto">
           <defs>
-            <linearGradient id="goldHead" x1="0%" y1="0%" x2="100%" y2="100%">
+            <linearGradient id="goldLogin" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stop-color="#FFFBEB" />
               <stop offset="50%" stop-color="#F59E0B" />
               <stop offset="100%" stop-color="#B45309" />
             </linearGradient>
           </defs>
-          <path d="M15 32C15 32 35 24 60 24C85 24 105 32 105 32V88C105 88 85 80 60 80C35 80 15 88 15 88V32Z" fill="#1e293b" stroke="url(#goldHead)" stroke-width="4"/>
+          <path d="M15 32C15 32 35 24 60 24C85 24 105 32 105 32V88C105 88 85 80 60 80C35 80 15 88 15 88V32Z" fill="#1e293b" stroke="url(#goldLogin)" stroke-width="4"/>
           <line x1="60" y1="24" x2="60" y2="80" stroke="url(#goldHead)" stroke-width="4"/>
-          <circle cx="60" cy="56" r="18" fill="#0b0f19" stroke="url(#goldHead)" stroke-width="3"/>
-          <text x="60" y="62" text-anchor="middle" fill="url(#goldHead)" font-size="13" font-weight="900">فهد</text>
+          <circle cx="60" cy="56" r="18" fill="#0b0f19" stroke="url(#goldLogin)" stroke-width="3"/>
+          <text x="60" y="62" text-anchor="middle" fill="url(#goldLogin)" font-size="13" font-weight="900">فهد</text>
         </svg>
+        <h2 class="text-xl font-black gold-text">PRIVATE LEDGER</h2>
+        <p class="text-xs text-gray-400">بوابة الدخول المشفرة والآمنة</p>
+      </div>
+
+      <!-- واجهة تسجيل الدخول المعتادة -->
+      <div id="loginFormArea" class="space-y-4">
         <div>
-          <h1 class="text-lg font-black tracking-wider gold-text">برايفت ليدجر | PRIVATE LEDGER</h1>
-          <p class="text-xs text-gray-400">السجل المالي المعتمد والمشفر</p>
+          <label class="text-xs text-gray-400 block mb-1">البريد الإلكتروني</label>
+          <input type="email" id="loginEmail" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-3 text-sm text-white focus:border-amber-500 outline-none" placeholder="name@example.com">
+        </div>
+        <div>
+          <label class="text-xs text-gray-400 block mb-1">كلمة المرور</label>
+          <input type="password" id="loginPassword" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-3 text-sm text-white focus:border-amber-500 outline-none" placeholder="••••••••">
+        </div>
+        <button onclick="handleLogin()" class="w-full bg-amber-500 hover:bg-amber-600 text-black font-bold py-3 rounded-lg text-sm transition">
+          تسجيل الدخول
+        </button>
+        <div class="border-t border-gray-800 pt-4 text-center">
+          <button onclick="showRegisterForm()" class="text-xs text-amber-400/80 hover:text-amber-400 underline">
+            تسجيل حساب عضو جديد (مع التحقق بالإيميل)
+          </button>
         </div>
       </div>
 
-      <!-- الأزرار العلوية -->
-      <div class="flex items-center gap-3">
-        <a href="https://share-store.com" target="_blank" class="flex items-center gap-1.5 text-xs bg-gray-800 hover:bg-gray-700 text-amber-400 border border-amber-500/30 px-3 py-1.5 rounded-lg transition font-bold">
-          <span>⚡ منصة شير ستور</span>
-        </a>
+      <!-- واجهة إرسال كود التحقق للاعضاء الجدد -->
+      <div id="registerFormArea" class="hidden space-y-4">
+        <div>
+          <label class="text-xs text-gray-400 block mb-1">أدخل بريدك الإلكتروني لاستلام كود التحقق</label>
+          <input type="email" id="regEmail" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-3 text-sm text-white focus:border-amber-500 outline-none" placeholder="user@example.com">
+        </div>
+        <button id="sendOtpBtn" onclick="sendOtpCode()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-lg text-sm transition">
+          📩 إرسال كود التحقق للبريد
+        </button>
+        <button onclick="showLoginForm()" class="w-full text-xs text-gray-400 hover:text-gray-200">
+          الرجوع لشاشة الدخول
+        </button>
+      </div>
+
+      <!-- واجهة إدخال كود الـ OTP -->
+      <div id="otpVerifyArea" class="hidden space-y-4">
+        <p class="text-xs text-emerald-400 text-center">تم إرسال كود التحقق بنجاح إلى بريدك الإلكتروني!</p>
+        <div>
+          <label class="text-xs text-gray-400 block mb-1">رمز التحقق (OTP)</label>
+          <input type="text" id="enteredOtp" maxlength="6" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-3 text-center text-lg font-bold tracking-widest text-amber-400 outline-none" placeholder="123456">
+        </div>
+        <button onclick="verifyOtpCode()" class="w-full bg-amber-500 hover:bg-amber-600 text-black font-bold py-3 rounded-lg text-sm transition">
+          تأكيد الدخول كعضو جديد
+        </button>
       </div>
 
     </div>
-  </header>
+  </div>
 
-  <!-- جسم المنصة -->
-  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
+  <!-- التطبيق الرئيسي -->
+  <div id="mainApp" class="hidden flex-1 flex flex-col">
+    
+    <div id="tickerBanner" class="bg-amber-500/10 border-b border-amber-500/20 text-amber-300 py-2.5 px-4 hidden">
+      <div class="max-w-7xl mx-auto marquee-container">
+        <div id="tickerText" class="marquee-content-rtl font-semibold text-sm"></div>
+      </div>
+    </div>
 
-    <!-- قسم المتجر المعتمد -->
-    <div id="storeDashboard" class="space-y-6">
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        
-        <!-- حاسبة الرصد المالي -->
-        <div class="bg-gray-900/90 border border-gray-800 rounded-2xl p-5 shadow-lg space-y-4">
-          <h3 class="font-bold text-amber-400 text-base">📊 رصد السجل المالي الشهري</h3>
+    <header class="border-b border-gray-800 bg-[#111827]/90 backdrop-blur sticky top-0 z-40">
+      <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <svg width="40" height="40" viewBox="0 0 120 120" fill="none" class="shrink-0">
+            <defs>
+              <linearGradient id="goldHead" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#FFFBEB" />
+                <stop offset="50%" stop-color="#F59E0B" />
+                <stop offset="100%" stop-color="#B45309" />
+              </linearGradient>
+            </defs>
+            <path d="M15 32C15 32 35 24 60 24C85 24 105 32 105 32V88C105 88 85 80 60 80C35 80 15 88 15 88V32Z" fill="#1e293b" stroke="url(#goldHead)" stroke-width="4"/>
+            <line x1="60" y1="24" x2="60" y2="80" stroke="url(#goldHead)" stroke-width="4"/>
+            <circle cx="60" cy="56" r="18" fill="#0b0f19" stroke="url(#goldHead)" stroke-width="3"/>
+            <text x="60" y="62" text-anchor="middle" fill="url(#goldHead)" font-size="13" font-weight="900">فهد</text>
+          </svg>
           <div>
-            <label class="text-xs text-gray-400 mb-1 block">إجمالي المبيعات (ريال)</label>
-            <input type="number" id="inputRevenue" oninput="calculateNet()" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-2.5 text-sm" placeholder="0.00">
-          </div>
-          <div>
-            <label class="text-xs text-gray-400 mb-1 block">إجمالي المصاريف والخسائر (ريال)</label>
-            <input type="number" id="inputExpenses" oninput="calculateNet()" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-2.5 text-sm" placeholder="0.00">
-          </div>
-          <div class="p-3 bg-gray-950 border border-gray-800 rounded-xl">
-            <div class="text-xs text-gray-400">صافي الربح التلقائي:</div>
-            <div id="netProfitDisplay" class="text-xl font-black text-emerald-400 mt-1">0.00 ر.س</div>
-          </div>
-          <button onclick="saveMonthlyRecord()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded-lg transition text-sm">حفظ التقرير الشهري</button>
-        </div>
-
-        <!-- الرسم البياني المقارن -->
-        <div class="lg:col-span-2 bg-gray-900/90 border border-gray-800 rounded-2xl p-5 shadow-lg flex flex-col justify-between">
-          <div class="flex items-center justify-between mb-3">
-            <h3 class="font-bold text-gray-200 text-sm">مقارنة أداء الأرباح (الشهر الماضي والشهر الحالي)</h3>
-            <span class="text-xs bg-emerald-900/40 text-emerald-300 border border-emerald-700/50 px-2 py-0.5 rounded">خاص ومشفر</span>
-          </div>
-          <div class="h-60">
-            <canvas id="financeChart"></canvas>
+            <h1 class="text-base font-black gold-text">برايفت ليدجر | PRIVATE LEDGER</h1>
+            <p id="userRoleBadge" class="text-[11px] text-amber-400 font-bold"></p>
           </div>
         </div>
 
+        <div class="flex items-center gap-3">
+          <a href="https://share-store.com" target="_blank" class="flex items-center gap-1.5 text-xs bg-gray-800 hover:bg-gray-700 text-amber-400 border border-amber-500/30 px-3 py-1.5 rounded-lg transition font-bold">
+            <span>⚡ منصة شير ستور</span>
+          </a>
+          <button onclick="logout()" class="text-xs bg-red-950/60 hover:bg-red-900 text-red-400 border border-red-800 px-3 py-1.5 rounded-lg transition">
+            تسجيل خروج
+          </button>
+        </div>
       </div>
-    </div>
+    </header>
 
-    <!-- مركز تحكم المالك العام (فهد) -->
-    <div class="border-t border-gray-800 pt-6 space-y-6">
-      <div class="flex items-center justify-between">
-        <h2 class="text-lg font-bold text-amber-400">👑 مركز تحكم المالك العام (فهد)</h2>
-        <span class="text-xs text-gray-400">صلاحيات كاملة للتحكم والخطابات</span>
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
+
+      <!-- بطاقة العضو الجديد -->
+      <div id="memberNotice" class="hidden bg-blue-950/40 border border-blue-800/50 rounded-xl p-6 text-center space-y-2">
+        <h3 class="text-blue-300 font-bold text-base">تم التحقق من بريدك بنجاح وأنت مسجل كـ "عضو جديد"</h3>
+        <p class="text-xs text-gray-400 max-w-md mx-auto">حسابك بانتظار اعتماد وترقية المالك العام (فهد) لتتمكن من رصد الأرباح وتفعيل المتجر.</p>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        
-        <!-- الشريط الإعلاني -->
-        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5 space-y-3">
-          <h4 class="font-bold text-sm text-gray-200">📢 إرسال إعلان وشريط متحرك</h4>
-          <input type="text" id="adminTickerInput" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-2 text-sm" placeholder="اكتب الإعلان هنا...">
-          <div class="grid grid-cols-2 gap-3">
+      <!-- قسم لوحة المتجر المعتمد -->
+      <div id="storeSection" class="hidden space-y-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          <div class="bg-gray-900/90 border border-gray-800 rounded-2xl p-5 shadow-lg space-y-4">
+            <h3 class="font-bold text-amber-400 text-base">📊 رصد السجل المالي الشهري</h3>
             <div>
-              <label class="text-xs text-gray-400 block mb-1">اتجاه الحركة</label>
-              <select id="tickerDirection" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-2 text-xs">
-                <option value="rtl">من اليمين لليسار</option>
-                <option value="ltr">من اليسار لليمين</option>
-              </select>
+              <label class="text-xs text-gray-400 mb-1 block">إجمالي المبيعات (ريال)</label>
+              <input type="number" id="inputRevenue" oninput="calculateNet()" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-2.5 text-sm" placeholder="0.00">
             </div>
             <div>
-              <label class="text-xs text-gray-400 block mb-1">مدة الظهور (ساعة)</label>
-              <input type="number" id="tickerDuration" value="24" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-2 text-xs">
+              <label class="text-xs text-gray-400 mb-1 block">إجمالي المصاريف والخسائر (ريال)</label>
+              <input type="number" id="inputExpenses" oninput="calculateNet()" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-2.5 text-sm" placeholder="0.00">
+            </div>
+            <div class="p-3 bg-gray-950 border border-gray-800 rounded-xl">
+              <div class="text-xs text-gray-400">صافي الربح التلقائي:</div>
+              <div id="netProfitDisplay" class="text-xl font-black text-emerald-400 mt-1">0.00 ر.س</div>
+            </div>
+            <button onclick="saveMonthlyRecord()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded-lg transition text-sm">حفظ التقرير الشهري</button>
+          </div>
+
+          <div class="lg:col-span-2 bg-gray-900/90 border border-gray-800 rounded-2xl p-5 shadow-lg flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="font-bold text-gray-200 text-sm">مقارنة أداء الأرباح (الشهر الماضي والشهر الحالي)</h3>
+              <span class="text-xs bg-emerald-900/40 text-emerald-300 border border-emerald-700/50 px-2 py-0.5 rounded">خاص ومشفر</span>
+            </div>
+            <div class="h-60">
+              <canvas id="financeChart"></canvas>
             </div>
           </div>
-          <button onclick="publishTicker()" class="w-full bg-amber-500 hover:bg-amber-600 text-black font-bold py-2 rounded-lg text-sm transition">نشر الإعلان</button>
-        </div>
-
-        <!-- توليد خطابات PDF الرسمية -->
-        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5 space-y-3">
-          <h4 class="font-bold text-sm text-gray-200">📄 إصدار خطاب رسمي موجه (PDF)</h4>
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="text-xs text-gray-400 block mb-1">مِن:</label>
-              <input type="text" id="pdfFrom" value="المالك: فهد عبدالله العتيبي" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-2 text-xs">
-            </div>
-            <div>
-              <label class="text-xs text-gray-400 block mb-1">إلى (المتجر المستهدف):</label>
-              <select id="pdfToStore" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-2 text-xs">
-                <option value="متجر إكسلورا">متجر إكسلورا</option>
-                <option value="متجر السهم الرقمي">متجر السهم الرقمي</option>
-              </select>
-            </div>
-          </div>
-          <textarea id="pdfBodyText" rows="2" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-2 text-xs" placeholder="اكتب نص الخطاب أو الملاحظة للمتجر..."></textarea>
-          
-          <div class="flex gap-2">
-            <button onclick="generateOfficialPDF()" class="flex-1 bg-gray-800 hover:bg-gray-700 text-amber-400 border border-amber-500/40 font-bold py-2 rounded-lg text-xs transition">
-              ⚡ توليد وتحميل الخطاب الرسمي (PDF)
-            </button>
-            <label class="cursor-pointer bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-2 rounded-lg text-xs border border-gray-700 flex items-center">
-              <span>📎 رفع ملف خارجي</span>
-              <input type="file" class="hidden" onchange="alert('تم إرفاق الملف وإرساله للمتجر المستهدف بنجاح!')">
-            </label>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- جدول المتاجر والصلاحيات -->
-      <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5">
-        <h4 class="font-bold text-sm text-gray-200 mb-3">👥 قائمة المتاجر والأعضاء</h4>
-        <div class="overflow-x-auto">
-          <table class="w-full text-right text-xs">
-            <thead>
-              <tr class="text-gray-400 border-b border-gray-800 pb-2">
-                <th class="p-2">الاسم / المتجر</th>
-                <th class="p-2">الحالة</th>
-                <th class="p-2">أرباح الشهر</th>
-                <th class="p-2">الإجراءات</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr class="border-b border-gray-800/40">
-                <td class="p-2">متجر إكسلورا</td>
-                <td class="p-2"><span class="bg-emerald-900/40 text-emerald-300 px-2 py-0.5 rounded">معتمد وفعال</span></td>
-                <td class="p-2 text-emerald-400 font-bold">14,250 ر.س</td>
-                <td class="p-2">
-                  <button onclick="toggleBan(this)" class="bg-red-950 text-red-400 border border-red-800 px-2 py-1 rounded">حظر المتجر</button>
-                </td>
-              </tr>
-              <tr class="border-b border-gray-800/40">
-                <td class="p-2">عضو جديد قيد الانتظار</td>
-                <td class="p-2"><span class="bg-blue-900/40 text-blue-300 px-2 py-0.5 rounded">عضو جديد</span></td>
-                <td class="p-2 text-gray-500">-</td>
-                <td class="p-2">
-                  <button onclick="promoteMember(this)" class="bg-amber-500 text-black font-bold px-2 py-1 rounded">ترقية لمتجر</button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
         </div>
       </div>
 
-    </div>
-  </main>
+      <!-- مركز تحكم المالك العام -->
+      <div id="ownerSection" class="hidden border-t border-gray-800 pt-6 space-y-6">
+        <div class="flex items-center justify-between">
+          <h2 class="text-lg font-bold text-amber-400">👑 مركز تحكم المالك العام (فهد)</h2>
+          <span class="text-xs text-emerald-400 font-bold">جلسة مشفرة وآمنة</span>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5 space-y-3">
+            <h4 class="font-bold text-sm text-gray-200">📢 إرسال إعلان وشريط متحرك</h4>
+            <input type="text" id="adminTickerInput" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-2 text-sm" placeholder="اكتب الإعلان هنا...">
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="text-xs text-gray-400 block mb-1">اتجاه الحركة</label>
+                <select id="tickerDirection" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-2 text-xs">
+                  <option value="rtl">من اليمين لليسار</option>
+                  <option value="ltr">من اليسار لليمين</option>
+                </select>
+              </div>
+              <div>
+                <label class="text-xs text-gray-400 block mb-1">مدة الظهور (ساعة)</label>
+                <input type="number" id="tickerDuration" value="24" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-2 text-xs">
+              </div>
+            </div>
+            <button onclick="publishTicker()" class="w-full bg-amber-500 hover:bg-amber-600 text-black font-bold py-2 rounded-lg text-sm transition">نشر الإعلان</button>
+          </div>
+
+          <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5 space-y-3">
+            <h4 class="font-bold text-sm text-gray-200">📄 إصدار خطاب رسمي موجه (PDF)</h4>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="text-xs text-gray-400 block mb-1">مِن:</label>
+                <input type="text" id="pdfFrom" value="المالك: فهد عبدالله العتيبي" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-2 text-xs">
+              </div>
+              <div>
+                <label class="text-xs text-gray-400 block mb-1">إلى (المتجر المستهدف):</label>
+                <select id="pdfToStore" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-2 text-xs">
+                  <option value="متجر إكسلورا">متجر إكسلورا</option>
+                  <option value="متجر السهم الرقمي">متجر السهم الرقمي</option>
+                </select>
+              </div>
+            </div>
+            <textarea id="pdfBodyText" rows="2" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-2 text-xs" placeholder="اكتب نص الخطاب أو الملاحظة للمتجر..."></textarea>
+            
+            <div class="flex gap-2">
+              <button onclick="generateOfficialPDF()" class="flex-1 bg-gray-800 hover:bg-gray-700 text-amber-400 border border-amber-500/40 font-bold py-2 rounded-lg text-xs transition">
+                ⚡ توليد وتحميل الخطاب الرسمي (PDF)
+              </button>
+              <label class="cursor-pointer bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-2 rounded-lg text-xs border border-gray-700 flex items-center">
+                <span>📎 رفع ملف</span>
+                <input type="file" class="hidden" onchange="alert('تم إرفاق الملف وإرساله للمتجر بنجاح!')">
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5">
+          <h4 class="font-bold text-sm text-gray-200 mb-3">👥 قائمة المتاجر والأعضاء</h4>
+          <div class="overflow-x-auto">
+            <table class="w-full text-right text-xs">
+              <thead>
+                <tr class="text-gray-400 border-b border-gray-800 pb-2">
+                  <th class="p-2">الاسم / المتجر</th>
+                  <th class="p-2">الحالة</th>
+                  <th class="p-2">أرباح الشهر</th>
+                  <th class="p-2">الإجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="memberTableBody">
+                <tr class="border-b border-gray-800/40">
+                  <td class="p-2">متجر إكسلورا</td>
+                  <td class="p-2"><span class="bg-emerald-900/40 text-emerald-300 px-2 py-0.5 rounded">معتمد وفعال</span></td>
+                  <td class="p-2 text-emerald-400 font-bold">14,250 ر.س</td>
+                  <td class="p-2">
+                    <button onclick="toggleBan(this)" class="bg-red-950 text-red-400 border border-red-800 px-2 py-1 rounded">حظر المتجر</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
 
   <script>
-    // تهيئة الرسم البياني
-    const ctx = document.getElementById('financeChart').getContext('2d');
-    const financeChart = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: ['الشهر الماضي', 'الشهر الحالي'],
-        datasets: [
-          { label: 'المبيعات', data: [12000, 18500], backgroundColor: '#38bdf8' },
-          { label: 'المصاريف', data: [4500, 5200], backgroundColor: '#f87171' },
-          { label: 'صافي الربح', data: [7500, 13300], backgroundColor: '#34d399' }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { labels: { color: '#9ca3af', font: { family: 'Tajawal' } } } },
-        scales: {
-          x: { ticks: { color: '#9ca3af' }, grid: { color: '#1f2937' } },
-          y: { ticks: { color: '#9ca3af' }, grid: { color: '#1f2937' } }
-        }
-      }
-    });
+    // تهيئة EmailJS بمفاتيحك الخاصة
+    const EMAILJS_SERVICE_ID  = "service_gkqsf5i";
+    const EMAILJS_TEMPLATE_ID = "template_1cnf5f4";
+    const EMAILJS_PUBLIC_KEY  = "oKlL4C-ot8SHjWoZ1";
 
-    // حساب صافي الربح
+    emailjs.init(EMAILJS_PUBLIC_KEY);
+
+    let generatedOtp = null;
+    let pendingUserEmail = "";
+
+    function showRegisterForm() {
+      document.getElementById('loginFormArea').classList.add('hidden');
+      document.getElementById('registerFormArea').classList.remove('hidden');
+    }
+
+    function showLoginForm() {
+      document.getElementById('registerFormArea').classList.add('hidden');
+      document.getElementById('otpVerifyArea').classList.add('hidden');
+      document.getElementById('loginFormArea').classList.remove('hidden');
+    }
+
+    // إرسال كود التحقق OTP للإيميل
+    async function sendOtpCode() {
+      const email = document.getElementById('regEmail').value.trim();
+      if (!email || !email.includes('@')) {
+        return alert('الرجاء إدخال بريد إلكتروني صحيح');
+      }
+
+      const btn = document.getElementById('sendOtpBtn');
+      btn.innerText = "⏳ جاري إرسال الكود...";
+      btn.disabled = true;
+
+      generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+      pendingUserEmail = email;
+
+      const templateParams = {
+        to_email: email,
+        email: email,
+        otp_code: generatedOtp,
+        passcode: generatedOtp
+      };
+
+      try {
+        await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
+        document.getElementById('registerFormArea').classList.add('hidden');
+        document.getElementById('otpVerifyArea').classList.remove('hidden');
+      } catch (err) {
+        console.error("EmailJS Error:", err);
+        alert('حدث خطأ أثناء الإرسال. تأكد من صحة البريد وحاول مجدداً.');
+      } finally {
+        btn.innerText = "📩 إرسال كود التحقق للبريد";
+        btn.disabled = false;
+      }
+    }
+
+    // التحقق من كود الـ OTP
+    function verifyOtpCode() {
+      const code = document.getElementById('enteredOtp').value.trim();
+      if (code === generatedOtp) {
+        alert('✅ تم التحقق من البريد بنجاح! تم تسجيلك كعضو جديد.');
+        currentUserRole = 'MEMBER';
+        
+        // إضافة العضو للجدول
+        const table = document.getElementById('memberTableBody');
+        const row = document.createElement('tr');
+        row.className = "border-b border-gray-800/40";
+        row.innerHTML = `
+          <td class="p-2">${pendingUserEmail}</td>
+          <td class="p-2"><span class="bg-blue-900/40 text-blue-300 px-2 py-0.5 rounded">عضو جديد</span></td>
+          <td class="p-2 text-gray-500">-</td>
+          <td class="p-2"><button onclick="promoteMember(this)" class="bg-amber-500 text-black font-bold px-2 py-1 rounded">ترقية لمتجر</button></td>
+        `;
+        table.appendChild(row);
+
+        launchDashboard();
+      } else {
+        alert('❌ كود التحقق غير صحيح، يرجى المحاولة مرة أخرى.');
+      }
+    }
+
+    // دوال الحماية وتشفير المالك
+    async function sha256(str) {
+      const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+      return Array.prototype.map.call(new Uint8Array(buf), x => (('00' + x.toString(16)).slice(-2))).join('');
+    }
+
+    const OWNER_EMAIL_HASH = "5d9463fb646206466c0d277e3f1c5fbeadda729bbec6136f71de645ae9ce863f";
+    const OWNER_PASS_HASH  = "6ff7246e658c77e9cd609c06b96f351264cb9dbc1337d0df266e4d2896f447bc";
+
+    let currentUserRole = null;
+
+    async function handleLogin() {
+      const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+      const pass = document.getElementById('loginPassword').value.trim();
+
+      const inputEmailHash = await sha256(email);
+      const inputPassHash = await sha256(pass);
+
+      if (inputEmailHash === OWNER_EMAIL_HASH && inputPassHash === OWNER_PASS_HASH) {
+        currentUserRole = 'OWNER';
+        launchDashboard();
+        return;
+      }
+
+      if (email.includes('store') && pass === '123456') {
+        currentUserRole = 'STORE';
+        launchDashboard();
+        return;
+      }
+
+      alert('❌ البريد الإلكتروني أو كلمة المرور غير صحيحة!');
+    }
+
+    function launchDashboard() {
+      document.getElementById('loginScreen').classList.add('hidden');
+      document.getElementById('mainApp').classList.remove('hidden');
+
+      const badge = document.getElementById('userRoleBadge');
+      const ownerSec = document.getElementById('ownerSection');
+      const storeSec = document.getElementById('storeSection');
+      const memNotice = document.getElementById('memberNotice');
+
+      if (currentUserRole === 'OWNER') {
+        badge.innerText = 'حساب المالك العام (فهد)';
+        badge.className = 'text-[11px] text-amber-400 font-bold';
+        ownerSec.classList.remove('hidden');
+        storeSec.classList.remove('hidden');
+        memNotice.classList.add('hidden');
+        initChart();
+      } else if (currentUserRole === 'STORE') {
+        badge.innerText = 'حساب متجر معتمد';
+        badge.className = 'text-[11px] text-emerald-400 font-bold';
+        ownerSec.classList.add('hidden');
+        storeSec.classList.remove('hidden');
+        memNotice.classList.add('hidden');
+        initChart();
+      } else {
+        badge.innerText = 'حساب عضو جديد';
+        badge.className = 'text-[11px] text-blue-400 font-bold';
+        ownerSec.classList.add('hidden');
+        storeSec.classList.add('hidden');
+        memNotice.classList.remove('hidden');
+      }
+    }
+
+    function logout() {
+      currentUserRole = null;
+      document.getElementById('mainApp').classList.add('hidden');
+      document.getElementById('loginScreen').classList.remove('hidden');
+      showLoginForm();
+      document.getElementById('loginEmail').value = '';
+      document.getElementById('loginPassword').value = '';
+    }
+
+    let financeChart = null;
+    function initChart() {
+      if (financeChart) return;
+      const ctx = document.getElementById('financeChart').getContext('2d');
+      financeChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['الشهر الماضي', 'الشهر الحالي'],
+          datasets: [
+            { label: 'المبيعات', data: [12000, 18500], backgroundColor: '#38bdf8' },
+            { label: 'المصاريف', data: [4500, 5200], backgroundColor: '#f87171' },
+            { label: 'صافي الربح', data: [7500, 13300], backgroundColor: '#34d399' }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { labels: { color: '#9ca3af', font: { family: 'Tajawal' } } } },
+          scales: {
+            x: { ticks: { color: '#9ca3af' }, grid: { color: '#1f2937' } },
+            y: { ticks: { color: '#9ca3af' }, grid: { color: '#1f2937' } }
+          }
+        }
+      });
+    }
+
     function calculateNet() {
       const rev = parseFloat(document.getElementById('inputRevenue').value) || 0;
       const exp = parseFloat(document.getElementById('inputExpenses').value) || 0;
@@ -234,7 +451,6 @@
       disp.className = net >= 0 ? "text-xl font-black text-emerald-400 mt-1" : "text-xl font-black text-red-400 mt-1";
     }
 
-    // حفظ التقرير الشهري
     function saveMonthlyRecord() {
       const rev = parseFloat(document.getElementById('inputRevenue').value) || 0;
       const exp = parseFloat(document.getElementById('inputExpenses').value) || 0;
@@ -247,7 +463,6 @@
       alert('✅ تم حفظ التقرير الشهري وتحديث الرسم البياني بنجاح وبسرية تامة!');
     }
 
-    // نشر الشريط الإعلاني
     function publishTicker() {
       const text = document.getElementById('adminTickerInput').value;
       const dir = document.getElementById('tickerDirection').value;
@@ -261,7 +476,6 @@
       alert('✅ تم نشر الشريط المتحرك بنجاح!');
     }
 
-    // توليد ملف PDF رسمي مع الشعار، البسملة، والأسماء
     function generateOfficialPDF() {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
@@ -271,20 +485,17 @@
       const body = document.getElementById('pdfBodyText').value || "خطاب وتوجيه رسمي موجه للمتجر المعتمد.";
       const currentDate = new Date().toLocaleDateString('ar-SA') + ' م';
 
-      // 1. البسملة في المنتصف
       doc.setFont("Helvetica", "bold");
       doc.setFontSize(16);
       doc.text("بسم الله الرحمن الرحيم", 105, 18, { align: "center" });
 
-      // 2. رسم شعار السجل الذهبي المعتمد مع ختم (فهد)
-      doc.setDrawColor(217, 119, 6); // لون ذهبي
+      doc.setDrawColor(217, 119, 6);
       doc.setLineWidth(1);
-      doc.rect(170, 10, 24, 18, 'S'); // إطار السجل
-      doc.circle(182, 19, 5, 'S'); // ختم التوثيق
+      doc.rect(170, 10, 24, 18, 'S');
+      doc.circle(182, 19, 5, 'S');
       doc.setFontSize(8);
-      doc.text("FAHAD", 182, 20, { align: "center" }); // اسم فهد داخل الختم
+      doc.text("FAHAD", 182, 20, { align: "center" });
 
-      // 3. اسم الموقع بالعربي والإنجليزي تحت البسملة والشعار
       doc.setFontSize(11);
       doc.setTextColor(180, 83, 9);
       doc.text("برايفت ليدجر | PRIVATE LEDGER", 105, 27, { align: "center" });
@@ -292,27 +503,22 @@
       doc.setTextColor(100, 100, 100);
       doc.text("منظومة السجلات والتقارير المالية المشفرة", 105, 32, { align: "center" });
 
-      // خط فاصل رسمي تحت الترويسة
       doc.setDrawColor(200, 200, 200);
       doc.setLineWidth(0.5);
       doc.line(15, 36, 195, 36);
 
-      // 4. بيانات التوجيه الرسمية والتاريخ التلقائي
       doc.setFontSize(10);
       doc.setTextColor(20, 20, 20);
       doc.text(`التاريخ: ${currentDate}`, 20, 45);
       doc.text(`مِن: ${from}`, 20, 53);
       doc.text(`إلى: ${to}`, 20, 61);
 
-      // خط فرعي قبل المحتوى
       doc.line(20, 66, 190, 66);
 
-      // 5. نص الخطاب
       doc.setFont("Helvetica", "normal");
       doc.setFontSize(11);
       doc.text(body, 20, 78, { maxWidth: 170 });
 
-      // 6. التوقيع والاعتماد في الأسفل
       doc.setFont("Helvetica", "bold");
       doc.setFontSize(10);
       doc.setTextColor(30, 30, 30);
@@ -323,14 +529,12 @@
       doc.save(`Official-Letter-${to}.pdf`);
     }
 
-    // ترقية عضو
     function promoteMember(btn) {
       btn.parentElement.parentElement.children[1].innerHTML = '<span class="bg-emerald-900/40 text-emerald-300 px-2 py-0.5 rounded">معتمد وفعال</span>';
       btn.parentElement.innerHTML = '<button onclick="toggleBan(this)" class="bg-red-950 text-red-400 border border-red-800 px-2 py-1 rounded">حظر المتجر</button>';
       alert('✅ تم ترقية العضو إلى متجر معتمد بنجاح!');
     }
 
-    // حظر وفك حظر
     function toggleBan(btn) {
       if (btn.innerText === 'حظر المتجر') {
         btn.innerText = 'فك الحظر';
