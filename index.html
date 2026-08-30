@@ -34,7 +34,7 @@
             </linearGradient>
           </defs>
           <path d="M15 32C15 32 35 24 60 24C85 24 105 32 105 32V88C105 88 85 80 60 80C35 80 15 88 15 88V32Z" fill="#1e293b" stroke="url(#goldLogin)" stroke-width="4"/>
-          <line x1="60" y1="24" x2="60" y2="80" stroke="url(#goldHead)" stroke-width="4"/>
+          <line x1="60" y1="24" x2="60" y2="80" stroke="url(#goldLogin)" stroke-width="4"/>
           <circle cx="60" cy="56" r="18" fill="#0b0f19" stroke="url(#goldLogin)" stroke-width="3"/>
           <text x="60" y="62" text-anchor="middle" fill="url(#goldLogin)" font-size="13" font-weight="900">فهد</text>
         </svg>
@@ -73,7 +73,7 @@
           <input type="password" id="regPassword" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-3 text-sm text-white focus:border-amber-500 outline-none" placeholder="••••••••">
         </div>
         <button id="sendOtpBtn" onclick="sendOtpCode()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-lg text-sm transition">
-          📩 إرسال كود التحقق للبريد
+          📩 طلب كود التحقق (OTP)
         </button>
         <button onclick="showLoginForm()" class="w-full text-xs text-gray-400 hover:text-gray-200">
           الرجوع لشاشة الدخول
@@ -82,9 +82,12 @@
 
       <!-- نموذج إدخال كود OTP -->
       <div id="otpVerifyArea" class="hidden space-y-4">
-        <p class="text-xs text-emerald-400 text-center">تم إرسال كود التحقق بنجاح إلى بريدك!</p>
+        <div class="bg-emerald-950/40 border border-emerald-800/60 p-3 rounded-xl text-center space-y-1">
+          <p class="text-xs text-emerald-400 font-bold">تم توليد كود التحقق بنجاح!</p>
+          <p class="text-[11px] text-gray-300">رمز التحقق السريع الخاص بك هو: <span id="displayedOtpCode" class="text-amber-400 font-bold tracking-widest text-sm select-all"></span></p>
+        </div>
         <div>
-          <label class="text-xs text-gray-400 block mb-1">رمز التحقق (OTP)</label>
+          <label class="text-xs text-gray-400 block mb-1">أدخل رمز التحقق (OTP)</label>
           <input type="text" id="enteredOtp" maxlength="6" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-3 text-center text-lg font-bold tracking-widest text-amber-400 outline-none" placeholder="123456">
         </div>
         <button id="verifyOtpBtn" onclick="verifyOtpCode()" class="w-full bg-amber-500 hover:bg-amber-600 text-black font-bold py-3 rounded-lg text-sm transition">
@@ -272,10 +275,22 @@
       return Array.prototype.map.call(new Uint8Array(buf), x => (('00' + x.toString(16)).slice(-2))).join('');
     }
 
-    // تنظيف الإيميل ليكون مفتاحاً متوافقاً في Firebase
     function sanitizeEmailKey(email) {
       return btoa(email).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
     }
+
+    // استعادة الجلسة تلقائياً عند تحديث الصفحة
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedSession = localStorage.getItem('pl_saved_session');
+      if (savedSession) {
+        try {
+          currentUser = JSON.parse(savedSession);
+          launchDashboard();
+        } catch (e) {
+          localStorage.removeItem('pl_saved_session');
+        }
+      }
+    });
 
     function showRegisterForm() {
       document.getElementById('loginFormArea').classList.add('hidden');
@@ -288,7 +303,7 @@
       document.getElementById('loginFormArea').classList.remove('hidden');
     }
 
-    // إرسال كود OTP
+    // توليد كود OTP وإظهاره فوراً مع إرسال إشعار
     async function sendOtpCode() {
       const email = document.getElementById('regEmail').value.trim().toLowerCase();
       const pass = document.getElementById('regPassword').value.trim();
@@ -297,35 +312,29 @@
       if (pass.length < 4) return alert('يرجى كتابة كلمة مرور لا تقل عن 4 خانات');
 
       const btn = document.getElementById('sendOtpBtn');
-      btn.innerText = "⏳ جاري إرسال الكود...";
+      btn.innerText = "⏳ جاري التوليد...";
       btn.disabled = true;
 
       generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
       pendingEmail = email;
       pendingPass = pass;
 
-      const formData = new FormData();
-      formData.append("access_key", WEB3FORMS_KEY);
-      formData.append("subject", "رمز التحقق لمنصة Private Ledger");
-      formData.append("email", email);
-      formData.append("message", `رمز التحقق الخاص بك هو: ${generatedOtp}\nصلاحية الرمز 15 دقيقة.`);
+      document.getElementById('displayedOtpCode').innerText = generatedOtp;
 
+      // إرسال إشعار للخلفية
       try {
-        const res = await fetch("https://api.web3forms.com/submit", { method: "POST", body: formData });
-        const data = await res.json();
-        if (data.success) {
-          document.getElementById('registerFormArea').classList.add('hidden');
-          document.getElementById('otpVerifyArea').classList.remove('hidden');
-          alert('📩 تم إرسال كود التحقق بنجاح إلى بريدك!');
-        } else {
-          alert('خطأ: ' + data.message);
-        }
-      } catch (e) {
-        alert('تعذر الاتصال بالخادم، تأكد من الإنترنت.');
-      } finally {
-        btn.innerText = "📩 إرسال كود التحقق للبريد";
-        btn.disabled = false;
-      }
+        const formData = new FormData();
+        formData.append("access_key", WEB3FORMS_KEY);
+        formData.append("subject", `طلب تسجيل عضو جديد: ${email}`);
+        formData.append("email", email);
+        formData.append("message", `رمز التحقق المنشأ هو: ${generatedOtp}`);
+        fetch("https://api.web3forms.com/submit", { method: "POST", body: formData });
+      } catch (e) {}
+
+      document.getElementById('registerFormArea').classList.add('hidden');
+      document.getElementById('otpVerifyArea').classList.remove('hidden');
+      btn.innerText = "📩 طلب كود التحقق (OTP)";
+      btn.disabled = false;
     }
 
     // تأكيد كود OTP وحفظ الحساب سحابياً في Firebase
@@ -358,7 +367,8 @@
         });
 
         currentUser = userData;
-        alert('✅ تم إنشاء الحساب ومزامنته سحابياً بنجاح! بانتظار اعتماد المالك.');
+        localStorage.setItem('pl_saved_session', JSON.stringify(currentUser));
+        alert('✅ تم إنشاء الحساب بنجاح! بانتظار اعتماد وترقية المالك العام.');
         launchDashboard();
       } catch (err) {
         alert('حدث خطأ أثناء الاتصال بقاعدة البيانات السحابية');
@@ -368,7 +378,7 @@
       }
     }
 
-    // تسجيل الدخول السحابي المشفر
+    // تسجيل الدخول السحابي
     async function handleLogin() {
       const email = document.getElementById('loginEmail').value.trim().toLowerCase();
       const pass = document.getElementById('loginPassword').value.trim();
@@ -379,11 +389,12 @@
       // تحقق المالك العام
       if (inputEmailHash === OWNER_EMAIL_HASH && inputPassHash === OWNER_PASS_HASH) {
         currentUser = { email: email, role: 'OWNER' };
+        localStorage.setItem('pl_saved_session', JSON.stringify(currentUser));
         launchDashboard();
         return;
       }
 
-      // تحقق الأعضاء والمتاجر من قاعدة البيانات السحابية
+      // تحقق الأعضاء والمتاجر سحابياً
       const btn = document.getElementById('loginBtn');
       btn.innerText = "⏳ جاري التحقق...";
       btn.disabled = true;
@@ -395,6 +406,7 @@
 
         if (user && user.passHash === inputPassHash) {
           currentUser = user;
+          localStorage.setItem('pl_saved_session', JSON.stringify(currentUser));
           launchDashboard();
         } else {
           alert('❌ البريد الإلكتروني أو كلمة المرور غير صحيحة!');
@@ -408,7 +420,7 @@
     }
 
     // تشغيل اللوحة
-    function launchDashboard() {
+    async function launchDashboard() {
       document.getElementById('loginScreen').classList.add('hidden');
       document.getElementById('mainApp').classList.remove('hidden');
 
@@ -426,31 +438,44 @@
         storeSec.classList.add('hidden');
         memNotice.classList.add('hidden');
         fetchCloudUsers();
-      } else if (currentUser.status === 'APPROVED') {
-        badge.innerText = `متجر معتمد (${currentUser.email})`;
-        badge.className = 'text-[11px] text-emerald-400 font-bold';
-        ownerSec.classList.add('hidden');
-        storeSec.classList.remove('hidden');
-        memNotice.classList.add('hidden');
-        loadStoreData();
-      } else if (currentUser.status === 'REJECTED') {
-        badge.innerText = 'طلب مرفوض';
-        badge.className = 'text-[11px] text-red-400 font-bold';
-        ownerSec.classList.add('hidden');
-        storeSec.classList.add('hidden');
-        memNotice.classList.remove('hidden');
-        document.getElementById('memberNoticeTitle').innerText = 'تم رفض طلب الانضمام';
-        document.getElementById('memberNoticeTitle').className = 'text-red-400 font-bold text-base';
-        document.getElementById('memberNoticeBody').innerText = 'نعتذر منك، لم تتم الموافقة على تفعيل المتجر من قِبل المالك.';
       } else {
-        badge.innerText = 'عضو جديد (قيد المراجعة)';
-        badge.className = 'text-[11px] text-blue-400 font-bold';
-        ownerSec.classList.add('hidden');
-        storeSec.classList.add('hidden');
-        memNotice.classList.remove('hidden');
-        document.getElementById('memberNoticeTitle').innerText = 'طلبك قيد المراجعة والاعتماد السحابي';
-        document.getElementById('memberNoticeTitle').className = 'text-blue-300 font-bold text-base';
-        document.getElementById('memberNoticeBody').innerText = 'تم تسجيل حسابك وهو معروض في لوحة المالك العام (فهد) بانتظار الترقية.';
+        // تحديث حالة العضو لحظياً من السحابة في حال قام المالك بتغييرها
+        try {
+          const emailKey = sanitizeEmailKey(currentUser.email);
+          const res = await fetch(`${FIREBASE_DB_URL}/users/${emailKey}.json`);
+          const latestUser = await res.json();
+          if (latestUser) {
+            currentUser = latestUser;
+            localStorage.setItem('pl_saved_session', JSON.stringify(currentUser));
+          }
+        } catch(e) {}
+
+        if (currentUser.status === 'APPROVED') {
+          badge.innerText = `متجر معتمد (${currentUser.email})`;
+          badge.className = 'text-[11px] text-emerald-400 font-bold';
+          ownerSec.classList.add('hidden');
+          storeSec.classList.remove('hidden');
+          memNotice.classList.add('hidden');
+          loadStoreData();
+        } else if (currentUser.status === 'REJECTED') {
+          badge.innerText = 'طلب مرفوض';
+          badge.className = 'text-[11px] text-red-400 font-bold';
+          ownerSec.classList.add('hidden');
+          storeSec.classList.add('hidden');
+          memNotice.classList.remove('hidden');
+          document.getElementById('memberNoticeTitle').innerText = 'تم رفض طلب الانضمام';
+          document.getElementById('memberNoticeTitle').className = 'text-red-400 font-bold text-base';
+          document.getElementById('memberNoticeBody').innerText = 'نعتذر منك، لم تتم الموافقة على تفعيل المتجر من قِبل المالك.';
+        } else {
+          badge.innerText = 'عضو جديد (قيد المراجعة)';
+          badge.className = 'text-[11px] text-blue-400 font-bold';
+          ownerSec.classList.add('hidden');
+          storeSec.classList.add('hidden');
+          memNotice.classList.remove('hidden');
+          document.getElementById('memberNoticeTitle').innerText = 'طلبك قيد المراجعة والاعتماد السحابي';
+          document.getElementById('memberNoticeTitle').className = 'text-blue-300 font-bold text-base';
+          document.getElementById('memberNoticeBody').innerText = 'تم تسجيل حسابك وهو معروض في لوحة المالك العام (فهد) بانتظار الترقية.';
+        }
       }
     }
 
@@ -508,7 +533,6 @@
       }
     }
 
-    // تحديث حالة الحساب سحابياً
     async function updateCloudStatus(emailKey, newStatus) {
       try {
         await fetch(`${FIREBASE_DB_URL}/users/${emailKey}/status.json`, {
@@ -580,6 +604,7 @@
         currentUser.revenue = rev;
         currentUser.expenses = exp;
         currentUser.net = net;
+        localStorage.setItem('pl_saved_session', JSON.stringify(currentUser));
         initChart(rev, exp, net);
         alert('✅ تم حفظ التقرير الشهري وتحديثه سحابياً بنجاح!');
       } catch (e) {
@@ -587,7 +612,6 @@
       }
     }
 
-    // نشر الإعلان السحابي
     async function publishTicker() {
       const text = document.getElementById('adminTickerInput').value;
       const dir = document.getElementById('tickerDirection').value;
@@ -673,6 +697,7 @@
 
     function logout() {
       currentUser = null;
+      localStorage.removeItem('pl_saved_session');
       document.getElementById('mainApp').classList.add('hidden');
       document.getElementById('loginScreen').classList.remove('hidden');
       showLoginForm();
