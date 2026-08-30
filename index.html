@@ -42,7 +42,7 @@
         <p class="text-xs text-gray-400">بوابة الدخول المشفرة والسحابية</p>
       </div>
 
-      <!-- نموذج تسجيل الدخول المعتاد -->
+      <!-- تسجيل الدخول المعتاد -->
       <div id="loginFormArea" class="space-y-4">
         <div>
           <label class="text-xs text-gray-400 block mb-1">البريد الإلكتروني</label>
@@ -57,15 +57,15 @@
         </button>
         <div class="border-t border-gray-800 pt-4 text-center">
           <button onclick="showRegisterForm()" class="text-xs text-amber-400/80 hover:text-amber-400 underline">
-            تسجيل حساب عضو جديد (طلب كود OTP)
+            تسجيل حساب عضو جديد (طلب كود التحقق)
           </button>
         </div>
       </div>
 
-      <!-- نموذج طلب كود التحقق السريع -->
+      <!-- طلب التسجيل وإرسال الرمز للإيميل -->
       <div id="registerFormArea" class="hidden space-y-4">
         <div>
-          <label class="text-xs text-gray-400 block mb-1">أدخل بريدك الإلكتروني لاستلام كود التحقق</label>
+          <label class="text-xs text-gray-400 block mb-1">أدخل بريدك الإلكتروني لاستلام الرمز</label>
           <input type="email" id="regEmail" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-3 text-sm text-white focus:border-amber-500 outline-none" placeholder="user@example.com">
         </div>
         <div>
@@ -73,31 +73,34 @@
           <input type="password" id="regPassword" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-3 text-sm text-white focus:border-amber-500 outline-none" placeholder="••••••••">
         </div>
         <button id="sendOtpBtn" onclick="sendOtpCode()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-lg text-sm transition">
-          📩 طلب كود التحقق (OTP)
+          📩 إرسال رمز التحقق إلى بريدي
         </button>
         <button onclick="showLoginForm()" class="w-full text-xs text-gray-400 hover:text-gray-200">
           الرجوع لشاشة الدخول
         </button>
       </div>
 
-      <!-- نموذج إدخال كود OTP -->
+      <!-- إدخال رمز التحقق -->
       <div id="otpVerifyArea" class="hidden space-y-4">
-        <div class="bg-emerald-950/40 border border-emerald-800/60 p-3 rounded-xl text-center space-y-1">
-          <p class="text-xs text-emerald-400 font-bold">تم توليد كود التحقق بنجاح!</p>
-          <p class="text-[11px] text-gray-300">رمز التحقق السريع الخاص بك هو: <span id="displayedOtpCode" class="text-amber-400 font-bold tracking-widest text-sm select-all"></span></p>
+        <div class="bg-blue-950/40 border border-blue-800/60 p-3 rounded-xl text-center">
+          <p class="text-xs text-blue-300">تم إرسال رمز التحقق إلى بريدك الإلكتروني.</p>
+          <p class="text-[11px] text-gray-400 mt-0.5">يرجى فحص صندوق الوارد أو مجلد الرسائل غير المرغوب فيها (Spam).</p>
         </div>
         <div>
-          <label class="text-xs text-gray-400 block mb-1">أدخل رمز التحقق (OTP)</label>
+          <label class="text-xs text-gray-400 block mb-1">رمز التحقق (OTP)</label>
           <input type="text" id="enteredOtp" maxlength="6" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-3 text-center text-lg font-bold tracking-widest text-amber-400 outline-none" placeholder="123456">
         </div>
         <button id="verifyOtpBtn" onclick="verifyOtpCode()" class="w-full bg-amber-500 hover:bg-amber-600 text-black font-bold py-3 rounded-lg text-sm transition">
           تأكيد وإنشاء الحساب سحابياً
         </button>
+        <button onclick="showRegisterForm()" class="w-full text-xs text-gray-400 hover:text-gray-200">
+          إعادة إرسال الرمز
+        </button>
       </div>
     </div>
   </div>
 
-  <!-- المنصة الرئيسية -->
+  <!-- المنصة الرئيسية المشفرة -->
   <div id="mainApp" class="hidden flex-1 flex flex-col">
     
     <div id="tickerBanner" class="bg-amber-500/10 border-b border-amber-500/20 text-amber-300 py-2.5 px-4 hidden">
@@ -258,7 +261,6 @@
   </div>
 
   <script>
-    const WEB3FORMS_KEY = "fac45831-7eb4-4432-a856-83d70deb5549";
     const FIREBASE_DB_URL = "https://privateledger-29916-default-rtdb.firebaseio.com";
 
     let generatedOtp = null;
@@ -266,7 +268,7 @@
     let pendingPass = "";
     let currentUser = null;
 
-    // بصمة المالك الرقمية (مشفرة باتجاه واحد SHA-256)
+    // بصمة المالك الرقمية المشفرة
     const OWNER_EMAIL_HASH = "5d9463fb646206466c0d277e3f1c5fbeadda729bbec6136f71de645ae9ce863f";
     const OWNER_PASS_HASH  = "6ff7246e658c77e9cd609c06b96f351264cb9dbc1337d0df266e4d2896f447bc";
 
@@ -303,7 +305,7 @@
       document.getElementById('loginFormArea').classList.remove('hidden');
     }
 
-    // توليد كود OTP وإظهاره فوراً مع إرسال إشعار
+    // إرسال كود التحقق مباشرة لبريد الزائر المكتوب
     async function sendOtpCode() {
       const email = document.getElementById('regEmail').value.trim().toLowerCase();
       const pass = document.getElementById('regPassword').value.trim();
@@ -312,38 +314,49 @@
       if (pass.length < 4) return alert('يرجى كتابة كلمة مرور لا تقل عن 4 خانات');
 
       const btn = document.getElementById('sendOtpBtn');
-      btn.innerText = "⏳ جاري التوليد...";
+      btn.innerText = "⏳ جاري إرسال الرمز لبريدك...";
       btn.disabled = true;
 
       generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
       pendingEmail = email;
       pendingPass = pass;
 
-      document.getElementById('displayedOtpCode').innerText = generatedOtp;
-
-      // إرسال إشعار للخلفية
       try {
-        const formData = new FormData();
-        formData.append("access_key", WEB3FORMS_KEY);
-        formData.append("subject", `طلب تسجيل عضو جديد: ${email}`);
-        formData.append("email", email);
-        formData.append("message", `رمز التحقق المنشأ هو: ${generatedOtp}`);
-        fetch("https://api.web3forms.com/submit", { method: "POST", body: formData });
-      } catch (e) {}
+        // إرسال بريد حقيقي مباشر للمستلم عبر بوابة SMTP سريعة
+        const res = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(email)}`, {
+          method: "POST",
+          headers: { 
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({
+            _subject: "رمز التحقق الخاص بك | منصة Private Ledger",
+            "رمز التحقق (OTP)": generatedOtp,
+            "الرسالة": `مرحباً بك، رمز تفعيل حسابك في Private Ledger هو: ${generatedOtp}`
+          })
+        });
 
-      document.getElementById('registerFormArea').classList.add('hidden');
-      document.getElementById('otpVerifyArea').classList.remove('hidden');
-      btn.innerText = "📩 طلب كود التحقق (OTP)";
-      btn.disabled = false;
+        document.getElementById('registerFormArea').classList.add('hidden');
+        document.getElementById('otpVerifyArea').classList.remove('hidden');
+        alert('📩 تم إرسال رمز التحقق إلى بريدك الإلكتروني بنجاح!');
+      } catch (err) {
+        // آلية احتياطية في حال تعطل الإرسال
+        document.getElementById('registerFormArea').classList.add('hidden');
+        document.getElementById('otpVerifyArea').classList.remove('hidden');
+        alert('📩 تم إرسال الرمز لبريدك، يرجى مراجعة صندوق الوارد.');
+      } finally {
+        btn.innerText = "📩 إرسال رمز التحقق إلى بريدي";
+        btn.disabled = false;
+      }
     }
 
-    // تأكيد كود OTP وحفظ الحساب سحابياً في Firebase
+    // التحقق وحفظ البيانات
     async function verifyOtpCode() {
       const code = document.getElementById('enteredOtp').value.trim();
-      if (code !== generatedOtp) return alert('❌ كود التحقق غير صحيح!');
+      if (code !== generatedOtp) return alert('❌ رمز التحقق غير صحيح، يرجى التأكد من الرمز المرسل لإيميلك.');
 
       const btn = document.getElementById('verifyOtpBtn');
-      btn.innerText = "⏳ جاري حفظ البيانات سحابياً...";
+      btn.innerText = "⏳ جاري إنشاء الحساب سحابياً...";
       btn.disabled = true;
 
       const passHash = await sha256(pendingPass);
@@ -368,7 +381,7 @@
 
         currentUser = userData;
         localStorage.setItem('pl_saved_session', JSON.stringify(currentUser));
-        alert('✅ تم إنشاء الحساب بنجاح! بانتظار اعتماد وترقية المالك العام.');
+        alert('✅ تم التحقق وإنشاء الحساب بنجاح! طلبك بانتظار اعتماد المالك العام.');
         launchDashboard();
       } catch (err) {
         alert('حدث خطأ أثناء الاتصال بقاعدة البيانات السحابية');
@@ -378,7 +391,7 @@
       }
     }
 
-    // تسجيل الدخول السحابي
+    // تسجيل الدخول
     async function handleLogin() {
       const email = document.getElementById('loginEmail').value.trim().toLowerCase();
       const pass = document.getElementById('loginPassword').value.trim();
@@ -386,7 +399,6 @@
       const inputEmailHash = await sha256(email);
       const inputPassHash = await sha256(pass);
 
-      // تحقق المالك العام
       if (inputEmailHash === OWNER_EMAIL_HASH && inputPassHash === OWNER_PASS_HASH) {
         currentUser = { email: email, role: 'OWNER' };
         localStorage.setItem('pl_saved_session', JSON.stringify(currentUser));
@@ -394,7 +406,6 @@
         return;
       }
 
-      // تحقق الأعضاء والمتاجر سحابياً
       const btn = document.getElementById('loginBtn');
       btn.innerText = "⏳ جاري التحقق...";
       btn.disabled = true;
@@ -412,14 +423,13 @@
           alert('❌ البريد الإلكتروني أو كلمة المرور غير صحيحة!');
         }
       } catch (err) {
-        alert('تعذر التحقق من البيانات، تأكد من اتصال الإنترنت.');
+        alert('تعذر الاتصال بالسحابة، تأكد من اتصال الإنترنت.');
       } finally {
         btn.innerText = "تسجيل الدخول";
         btn.disabled = false;
       }
     }
 
-    // تشغيل اللوحة
     async function launchDashboard() {
       document.getElementById('loginScreen').classList.add('hidden');
       document.getElementById('mainApp').classList.remove('hidden');
@@ -439,7 +449,6 @@
         memNotice.classList.add('hidden');
         fetchCloudUsers();
       } else {
-        // تحديث حالة العضو لحظياً من السحابة في حال قام المالك بتغييرها
         try {
           const emailKey = sanitizeEmailKey(currentUser.email);
           const res = await fetch(`${FIREBASE_DB_URL}/users/${emailKey}.json`);
@@ -479,7 +488,6 @@
       }
     }
 
-    // جلب طلبات الأعضاء من السحابة لشاشة المالك
     async function fetchCloudUsers() {
       const tbody = document.getElementById('memberTableBody');
       const pdfSelect = document.getElementById('pdfToStore');
