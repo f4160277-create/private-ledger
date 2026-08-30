@@ -21,7 +21,7 @@
 </head>
 <body class="min-h-screen flex flex-col justify-between">
 
-  <!-- شاشة الدخول والتسجيل -->
+  <!-- شاشة الدخول والتسجيل المشفرة -->
   <div id="loginScreen" class="fixed inset-0 bg-[#0b0f19] z-50 flex items-center justify-center p-4">
     <div class="bg-[#111827] border border-amber-500/30 rounded-2xl p-6 sm:p-8 w-full max-w-md shadow-2xl space-y-6">
       <div class="text-center space-y-2">
@@ -42,7 +42,7 @@
         <p class="text-xs text-gray-400">بوابة الدخول المشفرة والسحابية</p>
       </div>
 
-      <!-- تسجيل الدخول المعتاد -->
+      <!-- تسجيل الدخول -->
       <div id="loginFormArea" class="space-y-4">
         <div>
           <label class="text-xs text-gray-400 block mb-1">البريد الإلكتروني</label>
@@ -57,44 +57,26 @@
         </button>
         <div class="border-t border-gray-800 pt-4 text-center">
           <button onclick="showRegisterForm()" class="text-xs text-amber-400/80 hover:text-amber-400 underline">
-            تسجيل حساب عضو جديد (طلب كود التحقق)
+            ليس لديك حساب؟ تسجيل عضو جديد
           </button>
         </div>
       </div>
 
-      <!-- طلب التسجيل وإرسال الرمز للإيميل -->
+      <!-- تسجيل حساب جديد فوري ومشفر -->
       <div id="registerFormArea" class="hidden space-y-4">
         <div>
-          <label class="text-xs text-gray-400 block mb-1">أدخل بريدك الإلكتروني لاستلام الرمز</label>
+          <label class="text-xs text-gray-400 block mb-1">البريد الإلكتروني</label>
           <input type="email" id="regEmail" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-3 text-sm text-white focus:border-amber-500 outline-none" placeholder="user@example.com">
         </div>
         <div>
-          <label class="text-xs text-gray-400 block mb-1">أنشئ كلمة مرور لحسابك</label>
+          <label class="text-xs text-gray-400 block mb-1">كلمة المرور</label>
           <input type="password" id="regPassword" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-3 text-sm text-white focus:border-amber-500 outline-none" placeholder="••••••••">
         </div>
-        <button id="sendOtpBtn" onclick="sendOtpCode()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-lg text-sm transition">
-          📩 إرسال رمز التحقق إلى بريدي
+        <button id="regBtn" onclick="handleDirectRegister()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-lg text-sm transition">
+          🚀 إنشاء حساب وإرسال طلب الاعتماد
         </button>
         <button onclick="showLoginForm()" class="w-full text-xs text-gray-400 hover:text-gray-200">
-          الرجوع لشاشة الدخول
-        </button>
-      </div>
-
-      <!-- إدخال رمز التحقق -->
-      <div id="otpVerifyArea" class="hidden space-y-4">
-        <div class="bg-blue-950/40 border border-blue-800/60 p-3 rounded-xl text-center">
-          <p class="text-xs text-blue-300">تم إرسال رمز التحقق إلى بريدك الإلكتروني.</p>
-          <p class="text-[11px] text-gray-400 mt-0.5">يرجى فحص صندوق الوارد أو مجلد الرسائل غير المرغوب فيها (Spam).</p>
-        </div>
-        <div>
-          <label class="text-xs text-gray-400 block mb-1">رمز التحقق (OTP)</label>
-          <input type="text" id="enteredOtp" maxlength="6" class="w-full bg-gray-950 border border-gray-800 rounded-lg p-3 text-center text-lg font-bold tracking-widest text-amber-400 outline-none" placeholder="123456">
-        </div>
-        <button id="verifyOtpBtn" onclick="verifyOtpCode()" class="w-full bg-amber-500 hover:bg-amber-600 text-black font-bold py-3 rounded-lg text-sm transition">
-          تأكيد وإنشاء الحساب سحابياً
-        </button>
-        <button onclick="showRegisterForm()" class="w-full text-xs text-gray-400 hover:text-gray-200">
-          إعادة إرسال الرمز
+          الرجوع لشاشة تسجيل الدخول
         </button>
       </div>
     </div>
@@ -144,10 +126,10 @@
 
     <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
 
-      <!-- تنبيه العضو -->
+      <!-- تنبيه العضو حسب الحالة -->
       <div id="memberNotice" class="hidden bg-blue-950/40 border border-blue-800/50 rounded-xl p-6 text-center space-y-2">
-        <h3 id="memberNoticeTitle" class="text-blue-300 font-bold text-base">تم التحقق من بريدك وحسابك قيد المراجعة</h3>
-        <p id="memberNoticeBody" class="text-xs text-gray-400 max-w-md mx-auto">طلبك معروض حالياً لدى المالك العام (فهد) للترقية والاعتماد السحابي.</p>
+        <h3 id="memberNoticeTitle" class="text-blue-300 font-bold text-base">تم إنشاء حسابك وبانتظار اعتماد المالك</h3>
+        <p id="memberNoticeBody" class="text-xs text-gray-400 max-w-md mx-auto">طلبك مسجل ومعروض حالياً في لوحة تحكم المالك العام (فهد) للترقية والاعتماد.</p>
       </div>
 
       <!-- قسم إدارة وسجلات المتجر -->
@@ -263,12 +245,9 @@
   <script>
     const FIREBASE_DB_URL = "https://privateledger-29916-default-rtdb.firebaseio.com";
 
-    let generatedOtp = null;
-    let pendingEmail = "";
-    let pendingPass = "";
     let currentUser = null;
 
-    // بصمة المالك الرقمية المشفرة
+    // بصمة المالك الرقمية المشفرة باتجاه واحد SHA-256
     const OWNER_EMAIL_HASH = "5d9463fb646206466c0d277e3f1c5fbeadda729bbec6136f71de645ae9ce863f";
     const OWNER_PASS_HASH  = "6ff7246e658c77e9cd609c06b96f351264cb9dbc1337d0df266e4d2896f447bc";
 
@@ -301,69 +280,26 @@
 
     function showLoginForm() {
       document.getElementById('registerFormArea').classList.add('hidden');
-      document.getElementById('otpVerifyArea').classList.add('hidden');
       document.getElementById('loginFormArea').classList.remove('hidden');
     }
 
-    // إرسال كود التحقق مباشرة لبريد الزائر المكتوب
-    async function sendOtpCode() {
+    // إنشاء حساب فوري مع التشفير والحفظ السحابي
+    async function handleDirectRegister() {
       const email = document.getElementById('regEmail').value.trim().toLowerCase();
       const pass = document.getElementById('regPassword').value.trim();
 
       if (!email || !email.includes('@')) return alert('الرجاء إدخال بريد إلكتروني صحيح');
       if (pass.length < 4) return alert('يرجى كتابة كلمة مرور لا تقل عن 4 خانات');
 
-      const btn = document.getElementById('sendOtpBtn');
-      btn.innerText = "⏳ جاري إرسال الرمز لبريدك...";
+      const btn = document.getElementById('regBtn');
+      btn.innerText = "⏳ جاري إنشاء الحساب والتشفير...";
       btn.disabled = true;
 
-      generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
-      pendingEmail = email;
-      pendingPass = pass;
-
-      try {
-        // إرسال بريد حقيقي مباشر للمستلم عبر بوابة SMTP سريعة
-        const res = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(email)}`, {
-          method: "POST",
-          headers: { 
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          body: JSON.stringify({
-            _subject: "رمز التحقق الخاص بك | منصة Private Ledger",
-            "رمز التحقق (OTP)": generatedOtp,
-            "الرسالة": `مرحباً بك، رمز تفعيل حسابك في Private Ledger هو: ${generatedOtp}`
-          })
-        });
-
-        document.getElementById('registerFormArea').classList.add('hidden');
-        document.getElementById('otpVerifyArea').classList.remove('hidden');
-        alert('📩 تم إرسال رمز التحقق إلى بريدك الإلكتروني بنجاح!');
-      } catch (err) {
-        // آلية احتياطية في حال تعطل الإرسال
-        document.getElementById('registerFormArea').classList.add('hidden');
-        document.getElementById('otpVerifyArea').classList.remove('hidden');
-        alert('📩 تم إرسال الرمز لبريدك، يرجى مراجعة صندوق الوارد.');
-      } finally {
-        btn.innerText = "📩 إرسال رمز التحقق إلى بريدي";
-        btn.disabled = false;
-      }
-    }
-
-    // التحقق وحفظ البيانات
-    async function verifyOtpCode() {
-      const code = document.getElementById('enteredOtp').value.trim();
-      if (code !== generatedOtp) return alert('❌ رمز التحقق غير صحيح، يرجى التأكد من الرمز المرسل لإيميلك.');
-
-      const btn = document.getElementById('verifyOtpBtn');
-      btn.innerText = "⏳ جاري إنشاء الحساب سحابياً...";
-      btn.disabled = true;
-
-      const passHash = await sha256(pendingPass);
-      const emailKey = sanitizeEmailKey(pendingEmail);
+      const passHash = await sha256(pass);
+      const emailKey = sanitizeEmailKey(email);
 
       const userData = {
-        email: pendingEmail,
+        email: email,
         passHash: passHash,
         status: 'PENDING',
         revenue: 0,
@@ -381,17 +317,17 @@
 
         currentUser = userData;
         localStorage.setItem('pl_saved_session', JSON.stringify(currentUser));
-        alert('✅ تم التحقق وإنشاء الحساب بنجاح! طلبك بانتظار اعتماد المالك العام.');
+        alert('✅ تم إنشاء الحساب بنجاح! طلبك الآن معروض في شاشة المالك العام (فهد) للاعتماد.');
         launchDashboard();
       } catch (err) {
-        alert('حدث خطأ أثناء الاتصال بقاعدة البيانات السحابية');
+        alert('تعذر الاتصال بالسحابة، تأكد من اتصال الإنترنت.');
       } finally {
-        btn.innerText = "تأكيد وإنشاء الحساب سحابياً";
+        btn.innerText = "🚀 إنشاء حساب وإرسال طلب الاعتماد";
         btn.disabled = false;
       }
     }
 
-    // تسجيل الدخول
+    // تسجيل الدخول السحابي المشفر
     async function handleLogin() {
       const email = document.getElementById('loginEmail').value.trim().toLowerCase();
       const pass = document.getElementById('loginPassword').value.trim();
@@ -399,6 +335,7 @@
       const inputEmailHash = await sha256(email);
       const inputPassHash = await sha256(pass);
 
+      // تحقق المالك العام
       if (inputEmailHash === OWNER_EMAIL_HASH && inputPassHash === OWNER_PASS_HASH) {
         currentUser = { email: email, role: 'OWNER' };
         localStorage.setItem('pl_saved_session', JSON.stringify(currentUser));
@@ -406,6 +343,7 @@
         return;
       }
 
+      // تحقق الأعضاء والمتاجر
       const btn = document.getElementById('loginBtn');
       btn.innerText = "⏳ جاري التحقق...";
       btn.disabled = true;
@@ -423,13 +361,14 @@
           alert('❌ البريد الإلكتروني أو كلمة المرور غير صحيحة!');
         }
       } catch (err) {
-        alert('تعذر الاتصال بالسحابة، تأكد من اتصال الإنترنت.');
+        alert('تعذر التحقق من البيانات، تأكد من اتصال الإنترنت.');
       } finally {
         btn.innerText = "تسجيل الدخول";
         btn.disabled = false;
       }
     }
 
+    // تشغيل لوحة التحكم
     async function launchDashboard() {
       document.getElementById('loginScreen').classList.add('hidden');
       document.getElementById('mainApp').classList.remove('hidden');
@@ -488,6 +427,7 @@
       }
     }
 
+    // جلب طلبات الأعضاء من السحابة لشاشة المالك
     async function fetchCloudUsers() {
       const tbody = document.getElementById('memberTableBody');
       const pdfSelect = document.getElementById('pdfToStore');
